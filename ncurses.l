@@ -112,7 +112,7 @@
     (let Line (chop (get-line> This (: cursory)))
       (set (:: lines) (place (: cursory)
                              (: lines)
-                             (pack (remove (: cursorx) Line)))))
+                             (pack (remove (- (: cursorx) 1) Line)))))
     (adjust-cursor> This -1 0))
 
 
@@ -151,10 +151,11 @@
                Rem (- (: width) Len)
                Str (pack (mapcar '((I) " ") (range 1 (- Rem 5)))))
               (window-call> This "mvwprintw" NIL I 1 "%d| %s%s" I X Str)
-              (window-call> This "mvwchgat" NIL
-                            (: cursory)
-                            (+ (: cursorx) (+ Offset 2))
-                            1 0 (+ 1 (: colors)) 0)))
+              (if (= I (: cursory))
+                  (window-call> This "mvwchgat" NIL
+                                (: cursory)
+                                (+ (: cursorx) (+ Offset 2))
+                                1 0 (+ 1 (: colors)) 0))))
     (window-call> This "mvwprintw" NIL 0 1 "%d, %d -- %s"
                   (: cursorx)
                   (: cursory) Mode)
@@ -173,7 +174,6 @@
      ((= Mode 'normal) (cond
                         ((= Ch (char "q")) (setq Exit T))
                         ((= Ch (char "i"))
-                         (adjust-cursor> This -1 0)
                          (setq Mode 'insert))
                         ((= Ch (char "A"))
                          (move-cursor> This
@@ -193,14 +193,17 @@
                          (out (: name)
                               (prinl (text> This))))
                         ((= Ch (char "x"))
-                         (delete-char> This))
+                         (delete-char> This)
+                         (adjust-cursor> This 1 0))
                         ((= Ch (char "h")) (adjust-cursor> This -1 0))
                         ((= Ch (char "k")) (adjust-cursor> This 0 -1))
                         ((= Ch (char "j")) (adjust-cursor> This 0 1))
                         ((= Ch (char "l")) (adjust-cursor> This 1 0))))
      ((= Mode 'insert) (cond
                         ((= Ch 127) (delete-char> This))
-                        ((= Ch 27) (setq Mode 'normal))
+                        ((= Ch 27)
+                         (adjust-cursor> This -1 0)
+                         (setq Mode 'normal))
                         (T (add-char> This (char Ch))))))
     (list Mode Exit))
 
