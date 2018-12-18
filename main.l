@@ -11,6 +11,8 @@
      (curses "init_pair" NIL 1 *COLOR-WHITE *COLOR-BLUE)
      (curses "init_pair" NIL 2 *COLOR-BLUE *COLOR-WHITE)
      (setq CmdFileName (car (argv)))
+     (ifn (info CmdFileName)
+         (out CmdFileName))
      (setq CmdFileLines
            (in CmdFileName
                (make (until (eof) (link (line T))))))
