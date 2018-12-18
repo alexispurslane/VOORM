@@ -166,7 +166,10 @@
 
 (dm handle-key> (Ch Mode Exit)
     (cond
-     ((= Ch *KEY-RESIZE) (window-call> This "wclear" NIL))
+     ((= Ch *KEY-RESIZE)
+      (window-call> This "wclear" NIL)
+      (set (:: height) (get-height Screen))
+      (set (:: width) (get-width Screen)))
      ((= Mode 'normal) (cond
                         ((= Ch (char "q")) (setq Exit T))
                         ((= Ch (char "i"))
