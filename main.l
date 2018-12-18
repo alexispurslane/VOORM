@@ -9,7 +9,6 @@
      (curses "curs_set" NIL 0)
      (curses "start_color")
      (curses "init_pair" NIL 1 *COLOR-WHITE *COLOR-BLUE)
-     (curses "init_pair" NIL 2 *COLOR-BLUE *COLOR-WHITE)
      (setq CmdFileName (car (argv)))
      (let MainFrame (new '(+Interactive +FromFile +VisibleFrame)
                          0 0

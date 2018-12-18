@@ -1,7 +1,8 @@
 # VOORM
 ## Lightweight, extensable, hotloading, VIM-compatable
 
-VOORM is an editor born out of inspiration... It combines the philosophy of the language it is written in-- PicoLisp, and the central, core ideas useful to making a good editor.
+VOORM is an editor born out of inspiration... It combines the philosophy of the language it is
+written in-- PicoLisp, and the central, core ideas useful to making a good editor.
 VOORM has four main goals:
 
 1. VOORM must be lightweight, like PicoLisp. It must have a minimal CPU and memory footprint
@@ -27,5 +28,7 @@ language like PicoLisp, this would be impossible!
 For VOORM to be hotloading, the logic is much the same, but even more so! With PicoLisp's
 dynamic scoping, formal equivalency of code and data, and extreme dynamism, powerful hotloading
 capabilities are within our reach.
+
+
 
 
