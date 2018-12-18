@@ -80,12 +80,11 @@
          (if R (car R) NIL)))
 
 (dm move-cursor> (CX CY)
-    (let (LineLen (length (get-line> This (: cursory)))
+    (let (LineLen (length (get-line> This CY))
                   FileLen (length (: lines)))
+      (set (:: cursorx) (max 1 (min (+ 1 LineLen) CX)))
+      (set (:: cursory) (max 1 CY))
       (cond
-       ((and (>= CX 1) (<= CX (+ 1 LineLen)))
-        (set (:: cursorx) CX))
-       ((>= CY 1) (set (:: cursory) CY))
        ((> CY FileLen) (add-line> This ""))
        ((and (not (= (: cursory) CY)) (= LineLen 0))
         (set (:: lines) (head -1 (: lines)))))))
@@ -131,8 +130,7 @@
     (=: width W)
     (=: height H)
     (=: colors ColorPair)
-    (=: window (create-new-window X Y W H))
-    (window-call> This "nodelay" NIL 1))
+    (=: window (create-new-window X Y W H)))
 
 (dm width> () (: width))
 (dm height> () (: height))

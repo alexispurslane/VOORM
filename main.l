@@ -18,6 +18,7 @@
                          0 0
                          (get-width Screen) (get-height Screen)
                          CmdFileLines 1 1 1 CmdFileName)
+          (draw> MainFrame *Mode)
           (finally (delete> MainFrame)
                    (setq *Exit NIL)
                    (setq *Mode 'normal)
