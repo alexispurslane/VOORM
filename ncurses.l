@@ -83,9 +83,9 @@
     (let (LineLen (length (get-line> This (: cursory)))
                   FileLen (length (: lines)))
       (cond
-       ((and (>= CX 1) (>= CY 1) (<= CX (+ 1 LineLen)))
-        (set (:: cursorx) CX)
-        (set (:: cursory) CY))
+       ((and (>= CX 1) (<= CX (+ 1 LineLen)))
+        (set (:: cursorx) CX))
+       ((>= CY 1) (set (:: cursory) CY))
        ((> CY FileLen) (add-line> This ""))
        ((and (not (= (: cursory) CY)) (= LineLen 0))
         (set (:: lines) (head -1 (: lines)))))))
