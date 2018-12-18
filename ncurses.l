@@ -103,6 +103,7 @@
                                   (pack (insert (: cursorx) Line Text)))))
       (adjust-cursor> This 1 0))
      ((= Text "\n")
+      (set (:: lines) (insert (+ 1 (: cursory)) (: lines) ""))
       (move-cursor> This 1 (+ 1 (: cursory))))))
 
 (dm add-line> (Line)
@@ -165,6 +166,18 @@
     (window-call> This "wrefresh" NIL))
 
 
+(class +FromFile)
+
+(dm load-from-file> (Name)
+    (let Name (or Name (: name))
+         (ifn (info Name)
+              (out Name))
+         (set (:: lines) (in Name (make (until (eof) (link (line T))))))))
+
+(dm out-to-file> (Name)
+    (let Name (or Name (: Name))
+         (out Name (prinl (text> This)))))
+
 (class +Interactive)
 
 (dm handle-key> (Ch Mode Exit)
@@ -191,9 +204,7 @@
                         ((= Ch (char "o"))
                          (move-cursor> This 1 (+ 1 (cursor-y> This)))
                          (setq Mode 'insert))
-                        ((= Ch (char "w"))
-                         (out (: name)
-                              (prinl (text> This))))
+                        ((= Ch (char "w")) (out-to-file> This))
                         ((= Ch (char "x"))
                          (adjust-cursor> This 1 0)
                          (delete-char> This))

@@ -11,15 +11,11 @@
      (curses "init_pair" NIL 1 *COLOR-WHITE *COLOR-BLUE)
      (curses "init_pair" NIL 2 *COLOR-BLUE *COLOR-WHITE)
      (setq CmdFileName (car (argv)))
-     (ifn (info CmdFileName)
-         (out CmdFileName))
-     (setq CmdFileLines
-           (in CmdFileName
-               (make (until (eof) (link (line T))))))
-     (let MainFrame (new '(+Interactive +VisibleFrame)
+     (let MainFrame (new '(+Interactive +FromFile +VisibleFrame)
                          0 0
                          (get-width Screen) (get-height Screen)
-                         CmdFileLines 1 1 1 CmdFileName)
+                         (list "") 1 1 1 CmdFileName)
+          (load-from-file> MainFrame)
           (draw> MainFrame *Mode)
           (finally (delete> MainFrame)
                    (setq *Exit NIL)
