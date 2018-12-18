@@ -12,7 +12,7 @@ VOORM has four main goals:
    the frameworks VOORM is built in, must be available to the plugins that run in it. Part of 
    this, however, is making VOORM *safe*: the libraries and functionality exposed by VOORM must
    be powerful, but not risk crashing it.
-3. VOORM must be hotloading. VOORM must be able to run arbatrary picoLisp code in the context of
+3. VOORM must be hotloading. VOORM must be able to run arbitrary picoLisp code in the context of
    the editor itself, performantly and stably. Plugins, user extentions, and scripts should be
    able to add to the editor and be removed from the editor without a restart.
 4. VOORM must be VIM-compatable. Leveraging the wide userbase that has both muscle-memory for
@@ -22,10 +22,10 @@ VOORM has four main goals:
 All of these features are made possible by PicoLisp: for VOORM to be lightweight, we had few
 choices, and almost none of them had the ability to do the other points as well as picolisp did.
 For VOORM to be extensable, as much and more then Emacs, its exention language must be the same
-as it's implementation language. Without being written in a interprited, dynamic, flexable
+as it's implementation language. Without being written in a interpreted, dynamic, flexible
 language like PicoLisp, this would be impossible!
 For VOORM to be hotloading, the logic is much the same, but even more so! With PicoLisp's
-dynamic scoping, formal equivilancy of code and data, and extreme dynamism, powerful hotloading
+dynamic scoping, formal equivalency of code and data, and extreme dynamism, powerful hotloading
 capabilities are within our reach.
 
 
