@@ -65,7 +65,6 @@
     (let Win (curses "newwin" 'N H W Y X)
          (curses "keypad" NIL Win 1)
          (curses "mousemask" 'N *ALL-MOUSE-EVENTS 0)
-         (curses "wrefresh" NIL Win)
          Win))
 
 (de destroy-window (Win)
@@ -87,9 +86,7 @@
 (dm cursor-x> () (: cursorx))
 (dm cursor-y> () (: cursory))
 
-(dm get-line> (Y)
-    (let R (nth (: lines) (: cursory))
-         (if R (car R) NIL)))
+(dm get-line> (Y) (nth (or Y (: cursory)) (: lines)))
 
 (dm move-cursor> (CX CY)
     (let (LineLen (length (get-line> This CY))
@@ -109,13 +106,13 @@
 (dm add-char> (Text)
     (cond
      ((not (= Text "\n"))
-      (let Line (chop (get-line> This (: cursory)))
+      (let Line (chop (get-line> This))
            (set (:: lines) (place (: cursory)
                                   (: lines)
                                   (pack (insert (: cursorx) Line Text)))))
       (adjust-cursor> This 1 0))
      ((= Text "\n")
-      (let (Line (chop (get-line> This (: cursory)))
+      (let (Line (chop (get-line> This))
             RstLn (nth Line (: cursorx)))
         (set (:: lines) (place (: cursory)
                                (: lines)
@@ -127,7 +124,7 @@
     (set (:: lines) (append (: lines) (list Line))))
 
 (dm delete-char> ()
-    (let Line (chop (get-line> This (: cursory)))
+    (let Line (chop (get-line> This))
       (set (:: lines) (place (: cursory)
                              (: lines)
                              (pack (remove (- (: cursorx) 1) Line)))))
@@ -171,9 +168,9 @@
           ((and (< DY 0) (< (: cursory) (+ 1 (: scroll))))
            (dec (:: scroll) 1)))))
 
-(dm draw> (Mode Focus FocusIdx)
+(dm draw> (Idx)
     (window-call> This "wbkgd" NIL (color-pair (: colors)))
-    (if Focus
+    (if (= (cadr *State) Idx)
         (window-call> This "box" NIL 0 0)
       (window-call> This "wborder" NIL 32 32 32 32 32 32 32 32))
     (let (Height (- (: height) 2)
@@ -195,7 +192,7 @@
                              1 *REVERSE (: colors) 0)))))
     (window-call> This "mvwprintw" NIL 0 1 "%d, %d -- %s, %d (%d)"
                   (: cursorx)
-                  (: cursory) Mode (: scroll) FocusIdx)
+                  (: cursory) (caddr *State) (: scroll) Idx)
     (window-call> This "mvwprintw" NIL 0 (- (: width) (length (: name)) 3) "<%s>" (: name))
     (window-call> This "wrefresh" NIL))
 
@@ -203,39 +200,22 @@
 
 (dm choice> () (: choice))
 
-(dm handle-key> (Ch Mode)
+(dm handle-key> (Ch)
     (cond
      ((= Ch (char "h")) (adjust-cursor> This -1 0))
      ((= Ch (char "k")) (adjust-cursor> This 0 -1))
      ((= Ch (char "j")) (adjust-cursor> This 0 1))
      ((= Ch (char "l")) (adjust-cursor> This 1 0))
      ((= Ch (char "\n"))
-      (set (:: choice) (car (nth (: lines) (: cursory))))))
-    (list Mode NIL))
+      (set (:: choice) (get-line> This))))
+    *State)
 
-(dm handle-mouse> (MX MY Mode)
+(dm handle-mouse> (MX MY)
     (move-cursor> This (- MX 6) (- MY 1))
     (set (:: choice) (car (nth (: lines) (: cursory))))
-    (list Mode NIL))
+    *State)
 
-(dm handle-resize> (Mode)
+(dm handle-resize> ()
     (window-call> This "wclear" NIL)
     (set (:: height) (get-height Screen))
-    (set (:: width) (get-width Screen))
-    (list Mode NIL))
-
-(dm update> (Mode)
-    (let Ch (window-call> This "wgetch" 'I)
-         (prinl Ch)
-         (cond
-          ((= Ch *KEY-RESIZE)
-           (handle-resize> This Mode))
-          ((= Ch *KEY-MOUSE)
-           (when (= (curses "getmouse" 'N
-                            '(Event (20 I (I . 3) I))) 0)
-             (handle-mouse> This
-                            (+ (get Event 2 1) 1)
-                            (+ (get Event 2 2) 1)
-                            Mode)))
-          ((>= Ch 0)
-           (handle-key> This Ch Mode)))))
+    (set (:: width) (get-width Screen)))

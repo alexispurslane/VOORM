@@ -12,7 +12,8 @@
 
 (class +Editor)
 
-(dm handle-key> (Ch Mode Focus)
+(dm handle-key> (Ch)
+    (match '(@Frames @Focus @Mode) *State)
     (setq Exit NIL)
     (cond
      ((= Mode 'normal) (cond
@@ -56,34 +57,21 @@
                          (adjust-cursor> This -1 0)
                          (setq Mode 'normal))
                         (T (add-char> This (char Ch))))))
-    (list Mode Exit NIL Focus))
+    (if Exit
+      (let Res (list (delete F *Frames) (length *Frames) @Mode)
+           (delete> F)
+           Res)
+      (list @Frames @Focus @Mode)))
 
-(dm handle-mouse> (MX MY Mode)
+(dm handle-mouse> (MX MY)
     (move-cursor> This MX MY)
-    (list Mode NIL))
+    *State)
 
-(dm handle-resize> (Mode)
+(dm handle-resize> ()
     (window-call> This "wclear" NIL)
     (set (:: height) (get-height Screen))
-    (set (:: width) (get-width Screen))
-    (list Mode NIL))
+    (set (:: width) (get-width Screen)))
 
 (dm pos-inside> (MX MY)
     (and (>= MX (: x)) (>= MY (: y))
          (<= MY (+ (: height) (: y))) (<= MX (+ (: x) (: width)))))
-
-(dm update> (Mode Focus)
-    (let Ch (window-call> This "wgetch" 'I)
-         (cond
-          ((= Ch *KEY-RESIZE)
-           (handle-resize> This Mode))
-          ((= Ch *KEY-MOUSE)
-           (when (= (curses "getmouse" 'N
-                            '(Event (20 I (I . 3) I))) 0)
-             (let (MX (- (get Event 2 1) 5)
-                      MY (get Event 2 2))
-               (if (pos-inside> This MX MY)
-                   (handle-mouse> This (- MX (: x)) (- MY (: y)) Mode)
-                 (list Mode NIL (list MX MY))))))
-          ((>= Ch 0)
-           (handle-key> This Ch Mode Focus)))))
