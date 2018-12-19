@@ -58,6 +58,7 @@
                      (curses "raw")
                      (curses "noecho")
                      (curses "set_escdelay" NIL 15)
+                     (curses "nodelay" NIL (run Var) 1)
                      (run Body)))))
 
 (de create-new-window (X Y W H)
@@ -170,9 +171,11 @@
           ((and (< DY 0) (< (: cursory) (+ 1 (: scroll))))
            (dec (:: scroll) 1)))))
 
-(dm draw> (Mode)
+(dm draw> (Mode Focus FocusIdx)
     (window-call> This "wbkgd" NIL (color-pair (: colors)))
-    (window-call> This "box" NIL 0 0)
+    (if Focus
+        (window-call> This "box" NIL 0 0)
+      (window-call> This "wborder" NIL 32 32 32 32 32 32 32 32))
     (let (Height (- (: height) 2)
           Start (max 1 (+ (: scroll) 1))
           End (min (- (length (: lines)) 1) Height))
@@ -190,89 +193,49 @@
                              (- (: cursory) (: scroll))
                              (+ (: cursorx) (+ FinalOffset 4))
                              1 *REVERSE (: colors) 0)))))
-    (window-call> This "mvwprintw" NIL 0 1 "%d, %d -- %s, %d"
+    (window-call> This "mvwprintw" NIL 0 1 "%d, %d -- %s, %d (%d)"
                   (: cursorx)
-                  (: cursory) Mode (: scroll))
+                  (: cursory) Mode (: scroll) FocusIdx)
     (window-call> This "mvwprintw" NIL 0 (- (: width) (length (: name)) 3) "<%s>" (: name))
     (window-call> This "wrefresh" NIL))
 
+(class +Menu)
 
-(class +FromFile)
+(dm choice> () (: choice))
 
-(dm load-from-file> (Name)
-    (let Name (or Name (: name))
-         (ifn (info Name)
-              (out Name))
-         (set (:: lines) (in Name (make (until (eof) (link (line T))))))))
-
-(dm out-to-file> (Name)
-    (let Name (or Name (: name))
-         (out Name (prinl (text> This)))))
-
-(class +Interactive)
-
-(dm handle-key> (Ch Mode Exit)
+(dm handle-key> (Ch Mode)
     (cond
-     ((= Mode 'normal) (cond
-                        ((= Ch (char "q")) (setq Exit T))
-                        ((= Ch (char "i"))
-                         (setq Mode 'insert))
-                        ((= Ch (char "A"))
-                         (move-cursor> This
-                                       (+ 1 (length (get-line> This (cursor-y> This))))
-                                       (cursor-y> This))
-                         (setq Mode 'insert))
-                        ((= Ch (char "$"))
-                         (move-cursor> This
-                                       (+ 1 (length (get-line> This (cursor-y> This))))
-                                       (cursor-y> This)))
-                        ((= Ch (char "0"))
-                         (move-cursor> This 1 (cursor-y> This)))
-                        ((= Ch (char "o"))
-                         (move-cursor> This 1 (+ 1 (cursor-y> This)))
-                         (setq Mode 'insert))
-                        ((= Ch (char "w")) (out-to-file> This))
-                        ((= Ch (char "x"))
-                         (adjust-cursor> This 1 0)
-                         (delete-char> This))
-                        ((= Ch (char "r"))
-                         (adjust-cursor> This 1 0)
-                         (delete-char> This)
-                         (setq Mode 'insert))
-                        ((= Ch (char "h")) (adjust-cursor> This -1 0))
-                        ((= Ch (char "k")) (adjust-cursor> This 0 -1))
-                        ((= Ch (char "j")) (adjust-cursor> This 0 1))
-                        ((= Ch (char "l")) (adjust-cursor> This 1 0))))
-     ((= Mode 'insert) (cond
-                        ((= Ch *KEY-BACKSPACE) (delete-char> This))
-                        ((= Ch 27)
-                         (adjust-cursor> This -1 0)
-                         (setq Mode 'normal))
-                        (T (add-char> This (char Ch))))))
-    (list Mode Exit))
+     ((= Ch (char "h")) (adjust-cursor> This -1 0))
+     ((= Ch (char "k")) (adjust-cursor> This 0 -1))
+     ((= Ch (char "j")) (adjust-cursor> This 0 1))
+     ((= Ch (char "l")) (adjust-cursor> This 1 0))
+     ((= Ch (char "\n"))
+      (set (:: choice) (car (nth (: lines) (: cursory))))))
+    (list Mode NIL))
 
-(dm handle-mouse> (MX MY Mode Exit)
+(dm handle-mouse> (MX MY Mode)
     (move-cursor> This (- MX 6) (- MY 1))
-    (list Mode Exit))
+    (set (:: choice) (car (nth (: lines) (: cursory))))
+    (list Mode NIL))
 
-(dm handle-resize> (Mode Exit)
+(dm handle-resize> (Mode)
     (window-call> This "wclear" NIL)
     (set (:: height) (get-height Screen))
     (set (:: width) (get-width Screen))
-    (list Mode Exit))
+    (list Mode NIL))
 
-(dm update> (Mode Exit)
+(dm update> (Mode)
     (let Ch (window-call> This "wgetch" 'I)
+         (prinl Ch)
          (cond
           ((= Ch *KEY-RESIZE)
-           (handle-resize> This Mode Exit))
+           (handle-resize> This Mode))
           ((= Ch *KEY-MOUSE)
            (when (= (curses "getmouse" 'N
                             '(Event (20 I (I . 3) I))) 0)
              (handle-mouse> This
                             (+ (get Event 2 1) 1)
                             (+ (get Event 2 2) 1)
-                            Mode
-                            Exit)))
+                            Mode)))
           ((>= Ch 0)
-           (handle-key> This Ch Mode Exit)))))
+           (handle-key> This Ch Mode)))))
