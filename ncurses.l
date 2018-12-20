@@ -58,7 +58,7 @@
                      (curses "raw")
                      (curses "noecho")
                      (curses "set_escdelay" NIL 15)
-                     (curses "nodelay" NIL (run Var) 1)
+                     (curses "nodelay" NIL (run Var) 0)
                      (run Body)))))
 
 (de create-new-window (X Y W H)
@@ -86,11 +86,11 @@
 (dm cursor-x> () (: cursorx))
 (dm cursor-y> () (: cursory))
 
-(dm get-line> (Y) (nth (or Y (: cursory)) (: lines)))
+(dm get-line> (Y) (car (nth (: lines) (or Y (: cursory)))))
 
 (dm move-cursor> (CX CY)
     (let (LineLen (length (get-line> This CY))
-                  FileLen (length (: lines)))
+          FileLen (length (: lines)))
       (set (:: cursorx) (max 1 (min (+ 1 LineLen) CX)))
       (set (:: cursory) (max 1 CY))
       (cond
@@ -146,7 +146,7 @@
 
 (dm width> () (: width))
 (dm height> () (: height))
-(dm pos-x () (: x))
+(dm pos-x> () (: x))
 (dm pos-y> () (: y))
 (dm window> () (: window))
 (dm colors> () (: colors))
@@ -190,9 +190,9 @@
                              (- (: cursory) (: scroll))
                              (+ (: cursorx) (+ FinalOffset 4))
                              1 *REVERSE (: colors) 0)))))
-    (window-call> This "mvwprintw" NIL 0 1 "%d, %d -- %s, %d (%d)"
+    (window-call> This "mvwprintw" NIL 0 1 "%d, %d -- %s, %d (%d) L: %d"
                   (: cursorx)
-                  (: cursory) (caddr *State) (: scroll) Idx)
+                  (: cursory) (caddr *State) (: scroll) Idx (length (get-line> This)))
     (window-call> This "mvwprintw" NIL 0 (- (: width) (length (: name)) 3) "<%s>" (: name))
     (window-call> This "wrefresh" NIL))
 

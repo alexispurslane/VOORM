@@ -25,8 +25,8 @@
 (de update-state (Ch Frame)
     (cond
      ((= Ch *KEY-RESIZE)
-      (for (I . F) @Frames (handle-resize> F I))
-      (list @Frames @Focus @Mode))
+      (for (I . F) Frames (handle-resize> F I))
+      (list Frames Focus Mode))
      ((= Ch *KEY-MOUSE)
       (when (= (curses "getmouse" 'N
                        '(Event (20 I (I . 3) I))) 0)
@@ -34,25 +34,24 @@
               MY (get-mouse-y Event)
               MCF (mouse-choose-frame MX MY))
           (cond
-           ((pos-inside> Frame MX MY) (handle-mouse> Frame (- MX (: x)) (- MY (: y))))
-           (MCF (list @Frames MCF @Mode))
-           (T (list @Frames @Focus @Mode))))))
-     ((>= Ch 0) (handle-key> Frame Ch)))
-    *State)
+           ((pos-inside> Frame MX MY)
+            (handle-mouse> Frame
+                           (- MX (pos-x> Frame))
+                           (- MY (pos-y> Frame))))
+           (MCF (list Frames MCF Mode))
+           (T (list Frames Focus Mode))))))
+     ((>= Ch 0) (handle-key> Frame Ch))))
 
 (de init-screen ()
     (curses "curs_set" NIL 0)
     (curses "start_color")
     (curses "init_pair" NIL 1 *COLOR-WHITE *COLOR-BLUE))
 
-(de clear-memory ()
-    (mapcar delete> (car *State)))
-
 (de no-frames-left ()
     (or (not (lst? (car *State))) (= (length (car *State)) 0)))
 
 (de draw-frames ()
-    (for (I . F) @Frames (draw> F I)))
+    (for (I . F) (car *State) (draw> F I)))
 
 (de main ()
     (in-screen
@@ -61,14 +60,12 @@
      (setq *State (list (create-frames (argv)) 1 'normal))
      (init-screen)
 
-     (finally (clear-memory)
-              (until (no-frames-left)
-                     (let ((@Frames @Focus @Mode) *State)
-                       (draw-frames)
-                       (let Ch (curses "getch" 'I)
-                            (prinl Ch)
-                            (let Frame (car (nth @Frames @Focus))
-                                 (when Frame
-                                   (setq *State (update-state Ch Frame))))))))))
+     (draw-frames)
+     (until (no-frames-left)
+            (let (Frames (car *State) Focus (cadr *State) Mode (caddr *State))
+              (draw-frames)
+              (let? Frame (isa '+VisibleFrame (car (nth Frames Focus)))
+                    (setq *State (update-state (window-call> Frame "wgetch" 'I)
+                                               Frame)))))))
 (main)
 (bye)
