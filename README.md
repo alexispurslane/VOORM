@@ -30,5 +30,24 @@ dynamic scoping, formal equivalency of code and data, and extreme dynamism, powe
 capabilities are within our reach.
 
 
+## Screenshots
 
+![Two windows, just having used the mouse](/screenshots/VOORM1.png?raw=true "Two windows, just having used the mouse")
+![Two windows, editing other window](/screenshots/VOORM2.png?raw=true "Two windows, editing other window")
+![One window, editing own source](/screenshots/VOORM3.png?raw=true "One window, editing own souce")
+
+Hover over screenshots to see tooltips of what's happening.
+
+## State
+
+Currently, we're building a layer over top of Ncurses, specifically designed for handling a modal text editor made of
+
+many frames. It's essentially a text-focused Terminal UI DSL built to abstract out some of the handling from Ncurses. This
+means that as of now, any parts of the editor we are using (plus the ones that you see) are actually experimental testing
+rigs to take the +Frame and +VisibleFrame's text editing, input handling, and drawing capabilities out for a spin. In fact,
+`editor.l` is almost entirely temporary, although the general method setup will stay. We are also using editor.l and the `+Menu`
+class as tests for not only the `+Frames` but also the frame handling setup in `main.l`.
+
+**TL;DR**: Anything you see right now is basically a UI Demo used to test the underlying library, this is nowhere near the final editor.
+H
 
