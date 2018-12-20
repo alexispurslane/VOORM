@@ -2,6 +2,8 @@
 
 (load "/usr/lib/picolisp/lib.l")
 (load (pack *Loc "ncurses.l"))
+(load (pack *Loc "frame.l"))
+(load (pack *Loc "graphics.l"))
 (load (pack *Loc "editor.l"))
 
 (de create-frames (Argv)
