@@ -60,6 +60,7 @@
       (if Exit
           (let Res (list (delete This Frames) (max 1 (- (length Frames) 1)) Mode)
                (delete> This)
+               (curses "clear" NIL)
                Res)
         (list Frames Focus Mode))))
 
@@ -68,9 +69,11 @@
     *State)
 
 (dm handle-resize> ()
-    (window-call> This "wclear" NIL)
+    (curses "clear" NIL)
+    (set (:: width) (get-width Screen))
     (set (:: height) (get-height Screen))
-    (set (:: width) (get-width Screen)))
+    (destroy-window (: window))
+    (set (:: window) (create-new-window (: x) (: y) (: width) (: height))))
 
 (dm pos-inside> (MX MY)
     (and (>= MX (: x)) (>= MY (: y))

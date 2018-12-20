@@ -69,6 +69,7 @@
 
 (de destroy-window (Win)
     (curses "wborder" NIL Win 32 32 32 32 32 32 32 32)
+    (curses "wclear" NIL Win)
     (curses "wrefresh" NIL Win)
     (curses "delwin" NIL Win))
 
@@ -92,11 +93,7 @@
     (let (LineLen (length (get-line> This CY))
           FileLen (length (: lines)))
       (set (:: cursorx) (max 1 (min (+ 1 LineLen) CX)))
-      (set (:: cursory) (max 1 CY))
-      (cond
-       ((> CY FileLen) (add-line> This ""))
-       ((and (not (= (: cursory) CY)) (= LineLen 0))
-        (set (:: lines) (head -1 (: lines)))))))
+      (set (:: cursory) (max 1 (min (- (length (: lines)) 1) CY)))))
 
 (dm adjust-cursor> (DX DY)
     (move-cursor> This
@@ -124,11 +121,21 @@
     (set (:: lines) (append (: lines) (list Line))))
 
 (dm delete-char> ()
-    (let Line (chop (get-line> This))
-      (set (:: lines) (place (: cursory)
-                             (: lines)
-                             (pack (remove (- (: cursorx) 1) Line)))))
-    (adjust-cursor> This -1 0))
+    (cond
+     ((= (: cursorx) 1)
+      (let (ThisLine (chop (get-line> This))
+            LastLine (chop (get-line> This (- (: cursory) 1))))
+        (set (:: lines) (place (- (: cursory) 1)
+                               (: lines)
+                               (pack LastLine ThisLine)))
+        (set (:: lines) (remove (: cursory) (: lines)))
+        (move-cursor> This (- (length LastLine) 1) (- (: cursory) 1))))
+     (T
+      (let Line (chop (get-line> This))
+           (set (:: lines) (place (: cursory)
+                                  (: lines)
+                                  (pack (remove (- (: cursorx) 1) Line)))))
+      (adjust-cursor> This -1 0))))
 
 
 (class +VisibleFrame +Frame)
@@ -168,14 +175,17 @@
           ((and (< DY 0) (< (: cursory) (+ 1 (: scroll))))
            (dec (:: scroll) 1)))))
 
-(dm draw> (Idx)
-    (window-call> This "wbkgd" NIL (color-pair (: colors)))
-    (if (= (cadr *State) Idx)
-        (window-call> This "box" NIL 0 0)
-      (window-call> This "wborder" NIL 32 32 32 32 32 32 32 32))
+(dm draw-box> ()
+    (when (= (cadr *State) Idx)
+      (window-call> This "wattron" NIL (| *REVERSE *BOLD)))
+    (window-call> This "wborder" NIL 32 32 32 32 32 32 32 32)
+    (window-call> This "wattroff" NIL (| *REVERSE *BOLD)))
+
+(dm draw-contents> ()
     (let (Height (- (: height) 2)
           Start (max 1 (+ (: scroll) 1))
-          End (min (- (length (: lines)) 1) Height))
+          End (min (- (length (: lines)) 1) Height)
+          MarginOffset (+ 2 (length (format (length (: lines))))))
       (for (I . X) (head End (nth (: lines) Start))
            (let (LineNum (+ (: scroll) I)
                  Offset (length (format LineNum))
@@ -183,17 +193,38 @@
                  LPad (pack (mapcar '((I) " ") (range 1 (- Offset FinalOffset))))
                  Len (+ (+ FinalOffset (length X)) 1)
                  Rem (- (: width) Len)
+                 WindowWidth (- (: width) (+ 3 MarginOffset))
                  RPad (pack (mapcar '((I) " ") (range 1 (- Rem 5)))))
-             (window-call> This "mvwprintw" NIL I 1 "%s%d| %s%s" LPad LineNum X RPad)
+
+             (window-call> This "wattron" NIL (| *REVERSE *BOLD))
+             (window-call> This "mvwprintw" NIL I 1 "%s%d " LPad LineNum)
+             (window-call> This "wattroff" NIL (| *REVERSE *BOLD))
+
+             (when (= LineNum (: cursory)) (window-call> This "wattron" NIL *BOLD))
+             (window-call> This "mvwprintw" NIL I (+ 2 MarginOffset) "%s%s"
+                           (pack (head WindowWidth (chop X))) (if (< (length X) WindowWidth) RPad ""))
+             (when (= LineNum (: cursory)) (window-call> This "wattroff" NIL *BOLD))
+
              (when (= LineNum (: cursory))
                (window-call> This "mvwchgat" NIL
                              (- (: cursory) (: scroll))
                              (+ (: cursorx) (+ FinalOffset 4))
-                             1 *REVERSE (: colors) 0)))))
+                             1 (| *REVERSE *BOLD) (: colors) 0))))))
+
+(dm draw-statusline> ()
+    (window-call> This "wattron" NIL (| *REVERSE *BOLD))
     (window-call> This "mvwprintw" NIL 0 1 "%d, %d -- %s, %d (%d) L: %d"
                   (: cursorx)
                   (: cursory) (caddr *State) (: scroll) Idx (length (get-line> This)))
     (window-call> This "mvwprintw" NIL 0 (- (: width) (length (: name)) 3) "<%s>" (: name))
+    (window-call> This "wattroff" NIL (| *REVERSE *BOLD)))
+
+(dm draw> (Idx)
+    (window-call> This "wclear" NIL)
+    (window-call> This "wbkgd" NIL (color-pair (: colors)))
+    (draw-box> This)
+    (draw-contents> This)
+    (draw-statusline> This)
     (window-call> This "wrefresh" NIL))
 
 (class +Menu)
@@ -217,5 +248,7 @@
 
 (dm handle-resize> ()
     (window-call> This "wclear" NIL)
+    (set (:: width) (get-width Screen))
     (set (:: height) (get-height Screen))
-    (set (:: width) (get-width Screen)))
+    (destroy-window (: window))
+    (set (:: window) (create-new-window (: x) (: y) (: width) (: height))))

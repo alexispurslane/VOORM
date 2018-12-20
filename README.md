@@ -1,4 +1,3 @@
-# VOORM
 ## Lightweight, extensable, hotloading, VIM-compatable
 
 VOORM is an editor born out of inspiration... It combines the philosophy of the language it is
@@ -8,7 +7,7 @@ VOORM has four main goals:
 1. VOORM must be lightweight, like PicoLisp. It must have a minimal CPU and memory footprint
    by default. This is not just purism speaking: in order to support a large variety of plugins
    and be fast and usable in spite of that, VOORM as a platform must be solid and unobtrusive--
-  like a good foundation.
+   like a good foundation.
 2. VOORM must be extensable, like Emacs. All of VOORM, both internal editor functionality and 
    the frameworks VOORM is built in, must be available to the plugins that run in it. Part of 
    this, however, is making VOORM *safe*: the libraries and functionality exposed by VOORM must
@@ -40,14 +39,16 @@ Hover over screenshots to see tooltips of what's happening.
 
 ## State
 
-Currently, we're building a layer over top of Ncurses, specifically designed for handling a modal text editor made of
+Currently, we're building a layer over top of Ncurses, specifically designed for handling a modal
+text editor made of many frames. It's essentially a text-focused Terminal UI DSL built to abstract
+out some of the handling from Ncurses. This means that as of now, any parts of the editor we are
+using (plus the ones that you see) are actually experimental testing rigs to take the `+Frame` and
+`+VisibleFrame`'s text editing, input handling, and drawing capabilities out for a spin. In fact,
+`editor.l` is almost entirely temporary, although the general method setup will stay. We are also
+using editor.l and the `+Menu` class as tests for not only the `+Frames` but also the frame handling
+setup in `main.l`.
 
-many frames. It's essentially a text-focused Terminal UI DSL built to abstract out some of the handling from Ncurses. This
-means that as of now, any parts of the editor we are using (plus the ones that you see) are actually experimental testing
-rigs to take the +Frame and +VisibleFrame's text editing, input handling, and drawing capabilities out for a spin. In fact,
-`editor.l` is almost entirely temporary, although the general method setup will stay. We are also using editor.l and the `+Menu`
-class as tests for not only the `+Frames` but also the frame handling setup in `main.l`.
+**TL;DR**: Anything you see right now is basically a UI Demo used to test the underlying library,
+this is nowhere near the final editor.
 
-**TL;DR**: Anything you see right now is basically a UI Demo used to test the underlying library, this is nowhere near the final editor.
-H
 
