@@ -28,15 +28,6 @@ For VOORM to be hotloading, the logic is much the same, but even more so! With P
 dynamic scoping, formal equivalency of code and data, and extreme dynamism, powerful hotloading
 capabilities are within our reach.
 
-
-## Screenshots
-
-![Two windows, just having used the mouse](/screenshots/VOORM1.png?raw=true "Two windows, just having used the mouse")
-![Two windows, editing other window](/screenshots/VOORM2.png?raw=true "Two windows, editing other window")
-![One window, editing own source](/screenshots/VOORM3.png?raw=true "One window, editing own souce")
-
-Hover over screenshots to see tooltips of what's happening.
-
 ## State
 
 Currently, we're building a layer over top of Ncurses, specifically designed for handling a modal
@@ -51,4 +42,10 @@ setup in `main.l`.
 **TL;DR**: Anything you see right now is basically a UI Demo used to test the underlying library,
 this is nowhere near the final editor.
 
+## Screenshots
 
+![Two windows, just having used the mouse](/screenshots/VOORM1.png?raw=true "Two windows, just having used the mouse")
+![Two windows, editing other window](/screenshots/VOORM2.png?raw=true "Two windows, editing other window")
+![One window, editing own source](/screenshots/VOORM3.png?raw=true "One window, editing own souce")
+
+Hover over screenshots to see tooltips of what's happening.
