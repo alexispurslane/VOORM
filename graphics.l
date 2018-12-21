@@ -9,6 +9,7 @@
     (=: height H)
     (=: colors ColorPair)
     (=: scroll 0)
+    (=: shift 0)
     (=: window (create-new-window X Y W H)))
 
 (dm width> () (: width))
@@ -19,6 +20,7 @@
 (dm colors> () (: colors))
 (dm name> () (: name))
 (dm scroll-line> () (: scroll))
+(dm shift-amount> () (: shift))
 
 (dm window-call> (Name Ret . @)
     (pass curses Name Ret (window> This)))
@@ -30,9 +32,9 @@
     (super DX DY)
     (let Height (- (: height) 2)
          (cond
-          ((and (> DY 0) (> (: cursory) (+ (: scroll) Height)))
+          ((and (> DY 0) (> (+ (: shift) (: cursory)) (+ (: scroll) Height)))
            (inc (:: scroll) 1))
-          ((and (< DY 0) (< (: cursory) (+ 1 (: scroll))))
+          ((and (< DY 0) (< (+ (: shift) (: cursory)) (+ 1 (: scroll))))
            (dec (:: scroll) 1)))))
 
 (dm draw-box> ()
@@ -87,7 +89,8 @@
                                VisibleY
                                VisibleX
                                1 (| *REVERSE *BOLD) (: colors) 0)))
-             (setq ShiftDown LocalShiftDown)))))
+             (setq ShiftDown LocalShiftDown)))
+      ShiftDown))
 
 (dm draw-statusline> ()
     (when (= (cadr *State) Idx)
@@ -102,7 +105,7 @@
     (window-call> This "wclear" NIL)
     (window-call> This "wbkgd" NIL (color-pair (: colors)))
     (draw-box> This)
-    (draw-contents> This)
+    (set (:: shift) (draw-contents> This))
     (draw-statusline> This)
     (window-call> This "wrefresh" NIL))
 
