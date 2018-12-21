@@ -1,3 +1,4 @@
+## VOORM
 ## Lightweight, extensable, hotloading, VIM-compatable
 
 VOORM is an editor born out of inspiration... It combines the philosophy of the language it is
