@@ -3,7 +3,9 @@
 (dm T (Str CX CY)
     (=: lines (or Str (list "")))
     (=: cursorx (or CX 1))
-    (=: cursory (or CY 1)))
+    (=: cursory (or CY 1))
+    (=: clipboard 'clipboard)
+    (=: select-start NIL))
 
 (dm text> ()
     (apply pack (mapcar '((S) (pack S "\n")) (: lines))))
@@ -11,6 +13,39 @@
     (: lines))
 (dm cursor-x> () (: cursorx))
 (dm cursor-y> () (: cursory))
+
+(dm select-start> () (: select-start))
+(dm start-selection ()
+    (set (:: select-start) (list (: cursorx) (: cursory))))
+(dm in-selection> (X Y)
+    (and (>= (car (: select-start)) X)
+         (<= (: cursorx))
+         (>= (cadr (: select-start)))
+         (<= (: cursory))))
+(dm selected-text> ()
+    (let Selection ""
+         (for (LY . L) (head (- (: cursory)
+                                (cadr (: select-start)))
+                             (nth (: lines) (cadr (: select-start))))
+              (let (Line (chop L)
+                    Dist (if (= LY (cadr (: select-start)))
+                             (car (: select-start))
+                           (length Line))
+                    SX (if (= LY (: cursory)) (: cursorx) 1)
+                    Section (head Dist (nth Line SX)))
+                (setq Selection (append Selection (cons "\n" Section)))))
+         Selection))
+(dm copy> (Register)
+    (if Register
+        (put (cadddr *State)
+             Register
+             (selected-text> This))
+        (set (cadddr *State) (selected-text> This))))
+
+(dm paste> (Register)
+    (if Register
+        (add-char> This (get (cadddr *State) Register))
+        (add-char> This (cadddr *State))))
 
 (dm get-line> (Y) (car (nth (: lines) (or Y (: cursory)))))
 
@@ -24,6 +59,10 @@
     (move-cursor> This
                   (+ DX (: cursorx))
                   (+ DY (: cursory))))
+
+(dm replace-char> (Text)
+    (delete-char>)
+    (add-char> Text))
 
 (dm add-char> (Text)
     (cond

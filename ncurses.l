@@ -53,6 +53,7 @@
 
 (de in-screen "Args"
     (let (Var (car "Args") Body (cdr "Args"))
+      (native "@" "setlocale" NIL 0 "")
       (bind (list (cons Var (curses "initscr" 'N)))
             (finally (curses "endwin")
                      (curses "raw")

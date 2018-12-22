@@ -28,7 +28,7 @@
     (cond
      ((= Ch *KEY-RESIZE)
       (for (I . F) Frames (handle-resize> F I))
-      (list Frames Focus Mode))
+      *State)
      ((= Ch *KEY-MOUSE)
       (when (= (curses "getmouse" 'N
                        '(Event (20 I (I . 3) I))) 0)
@@ -40,8 +40,8 @@
             (handle-mouse> Frame
                            (- MX (pos-x> Frame))
                            (- MY (pos-y> Frame))))
-           (MCF (list Frames MCF Mode))
-           (T (list Frames Focus Mode))))))
+           (MCF (list Frames MCF Mode Clipboard))
+           (T *State)))))
      ((>= Ch 0) (handle-key> Frame Ch))))
 
 (de init-screen ()
@@ -59,12 +59,12 @@
     (in-screen
      Screen
 
-     (setq *State (list (create-frames (argv)) 1 'normal))
+     (setq *State (list (create-frames (argv)) 1 'normal 'clipboard))
      (init-screen)
 
      (draw-frames)
      (until (no-frames-left)
-            (let (Frames (car *State) Focus (cadr *State) Mode (caddr *State))
+            (let (Frames (car *State) Focus (cadr *State) Mode (caddr *State) Clipboard (cadddr *State))
               (draw-frames)
               (let? Frame (isa '+VisibleFrame (car (nth Frames Focus)))
                     (setq *State (update-state (window-call> Frame "wgetch" 'I)

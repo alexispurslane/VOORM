@@ -43,11 +43,50 @@
     (window-call> This "wborder" NIL 32 32 32 32 32 32 32 32)
     (window-call> This "wattroff" NIL (| *REVERSE *BOLD)))
 
+(dm draw-selection> ()
+    (when (: select-start)
+      (let (SelectStartX (car (: select-start))
+            SelectStartY (cadr (: select-start))
+            VisibleSSX (+ MarginOffset 3
+                          (% SelectStartX (+ WindowWidth 1))
+                          (/ SelectStartX (+ WindowWidth 1)))
+            AdjSSY (- SelectStartY (: scroll))
+            VisibleSSY (+ AdjSSY ShiftDown (/ SelectStartX (+ WindowWidth 1)))
+
+            VisibleX (+ MarginOffset 3
+                        (% (: cursorx) (+ WindowWidth 1))
+                        (/ (: cursorx) (+ WindowWidth 1)))
+            VisibleY (+ (- (: cursory) (: scroll)) ShiftDown (/ (: cursorx) (+ WindowWidth 1))))
+        (for Y (range VisibleSSY VisibleY)
+             (window-call> This "mvwchgat" NIL
+                           Y
+                           (cond
+                            ((= Y SelectStartY) (: cursorx))
+                            ((= Y (: cursory)) SelectStartX)
+                            (T 1))
+                           (cond
+                            ((= SelectStartY (: cursory) Y) (- (: cursorx) SelectStartX))
+                            ((= Y SelectStartY) (- WindowWidth SelectStartX))
+                            ((= Y (: cursory)) (- WindowWidth (: cursorx)))
+                            (T WindowWidth))
+                           (| *REVERSE *BOLD) (: colors) 0)))))
+
+(dm draw-cursor> ()
+    (when (= LineNum (: cursory))
+      (let (VisibleX (+ MarginOffset
+                        (% (: cursorx) (+ WindowWidth 1))
+                        (/ (: cursorx) (+ WindowWidth 1)))
+            VisibleY (+ I ShiftDown (/ (: cursorx) (+ WindowWidth 1))))
+        (window-call> This "mvwchgat" NIL
+                      VisibleY
+                      (- VisibleX 1)
+                      1 (| *REVERSE *BOLD) (: colors) 0))))
+
 (dm draw-contents> ()
     (let (Height (- (: height) 2)
           Start (max 1 (+ (: scroll) 1))
           End (min (- (length (: lines)) 1) Height)
-          MarginOffset (+ 2 (length (format (length (: lines)))))
+          MarginOffset (length (format (length (: lines))))
           VisibleLines (head End (nth (: lines) Start))
           ShiftDown 0)
       (for (I . X) VisibleLines
@@ -55,13 +94,17 @@
              (setq ShiftDown (- ShiftDown 1)))
            (let (LineNum (+ (: scroll) I)
                  Offset (length (format LineNum))
-                 FinalOffset (- (length (format (+ (: scroll) (length VisibleLines)))) 1)
-                 LPad (pack (mapcar '((I) " ") (range 1 (- Offset FinalOffset))))
-                 Len (+ (+ FinalOffset (length X)) 1)
+                 Diff (- MarginOffset Offset)
+                 LPad (if (> Diff 1)
+                          (pack (mapcar '((I) " ") (range 2 Diff)))
+                        "")
+                 Len (+ MarginOffset (length X))
                  Rem (- (: width) Len)
                  WindowWidth (- (: width) (+ 3 MarginOffset))
                  LocalShiftDown ShiftDown
-                 RPad (pack (mapcar '((I) " ") (range 1 (- Rem 5)))))
+                 RPad (if (> (- Rem 5) 1)
+                          (pack (mapcar '((I) " ") (range 1 (- Rem 5))))
+                        ""))
 
              (when (= (cadr *State) Idx)
                (window-call> This "wattron" NIL (| *REVERSE *BOLD)))
@@ -70,39 +113,36 @@
 
              (when (= LineNum (: cursory)) (window-call> This "wattron" NIL *BOLD))
              (for O (+ (/ (length X) WindowWidth) 1)
-                  (let Str (pack (head WindowWidth (nth (chop X) (+ 1 (* (- O 1) WindowWidth)))))
+                  (let (RealX (+ 1 (* (- O 1) WindowWidth))
+                        Str (pack (head WindowWidth (nth (chop X) RealX))))
                        (window-call> This "mvwprintw" NIL
                                      (+ LocalShiftDown I)
-                                     (+ 1 MarginOffset)
+                                     MarginOffset
                                      "%s%s"
                                      Str
                                      (if (< (length X) WindowWidth) RPad ""))
                        (setq LocalShiftDown (+ LocalShiftDown 1))))
              (when (= LineNum (: cursory)) (window-call> This "wattroff" NIL *BOLD))
 
-             (when (= LineNum (: cursory))
-               (let (VisibleX (+ FinalOffset 3
-                                 (% (: cursorx) (+ WindowWidth 1))
-                                 (/ (: cursorx) (+ WindowWidth 1)))
-                     VisibleY (+ I ShiftDown (/ (: cursorx) (+ WindowWidth 1))))
-                 (window-call> This "mvwchgat" NIL
-                               VisibleY
-                               VisibleX
-                               1 (| *REVERSE *BOLD) (: colors) 0)))
+             (draw-selection> This)
+             (draw-cursor> This)
              (setq ShiftDown LocalShiftDown)))
       ShiftDown))
 
 (dm draw-statusline> ()
     (when (= (cadr *State) Idx)
       (window-call> This "wattron" NIL (| *REVERSE *BOLD)))
-    (window-call> This "mvwprintw" NIL 0 1 "%d, %d -- %s, %d (%d) L: %d"
+    (window-call> This "mvwprintw" NIL 0 1 "\9094\ (%d, %d) \9112\ (%d, %d)\9205\   \8661\ %d \9093\ %d \9175\ %d\9205\   \9000\  %s"
                   (: cursorx)
-                  (: cursory) (caddr *State) (: scroll) Idx (length (get-line> This)))
+                  (: cursory)
+                  (car (: select-start))
+                  (cadr (: select-start))
+                  (: scroll) Idx (length (get-line> This))
+                  (caddr *State))
     (window-call> This "mvwprintw" NIL 0 (- (: width) (length (: name)) 3) "<%s>" (: name))
     (window-call> This "wattroff" NIL (| *REVERSE *BOLD)))
 
 (dm draw> (Idx)
-    (window-call> This "wclear" NIL)
     (window-call> This "wbkgd" NIL (color-pair (: colors)))
     (draw-box> This)
     (set (:: shift) (draw-contents> This))
