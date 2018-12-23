@@ -61,11 +61,11 @@
              (window-call> This "mvwchgat" NIL
                            Y
                            (cond
-                            ((= Y SelectStartY) (: cursorx))
                             ((= Y (: cursory)) SelectStartX)
+                            ((= Y SelectStartY) (: cursorx))
                             (T 1))
                            (cond
-                            ((= SelectStartY (: cursory) Y) (- (: cursorx) SelectStartX))
+                            ((= SelectStartY (: cursory) Y) (+ (- (: cursorx) SelectStartX) 1))
                             ((= Y SelectStartY) (- WindowWidth SelectStartX))
                             ((= Y (: cursory)) (- WindowWidth (: cursorx)))
                             (T WindowWidth))
@@ -164,7 +164,7 @@
     *State)
 
 (dm handle-mouse> (MX MY)
-    (move-cursor> This (- MX 6) (- MY 1))
+    (move-cursor> This MX (- MY 1))
     (set (:: choice) (car (nth (: lines) (: cursory))))
     *State)
 

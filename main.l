@@ -21,7 +21,7 @@
     (let MatchingFrame (find '((F) (pos-inside> F MX MY)) (car *State))
          (when MatchingFrame (index MatchingFrame (car *State)))))
 
-(de get-mouse-x (Event) (- (get Event 2 1) 5))
+(de get-mouse-x (Event) (get Event 2 1))
 (de get-mouse-y (Event) (get Event 2 2))
 
 (de update-state (Ch Frame)

@@ -50,3 +50,4 @@ this is nowhere near the final editor.
 ![One window, editing own source](/screenshots/VOORM3.png?raw=true "One window, editing own souce")
 
 Hover over screenshots to see tooltips of what's happening.
+
