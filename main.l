@@ -44,10 +44,35 @@
            (T *State)))))
      ((>= Ch 0) (handle-key> Frame Ch))))
 
+(de adjust-color (C)
+    (min 1000 (max 1 (* C 4))))
+
 (de init-screen ()
     (curses "curs_set" NIL 0)
     (curses "start_color")
-    (curses "init_pair" NIL 1 *COLOR-WHITE *COLOR-BLUE))
+    (let (Config (eval (in "/usr/share/voorm/voorm-settings.l" (read)))
+          Colors (cdr (assoc 'color-scheme-colors Config))
+          Scheme (cdr (assoc 'color-scheme Config))
+          Bkg (cond
+               ((= Scheme 'dark) *COLOR-SCHEME-BACKGROUND-DARK)
+               ((= Scheme 'light) *COLOR-SCHEME-BACKGROUND-LIGHT)))
+      (out "/usr/share/voorm/voorm.log"
+           (prinl "Colors:")
+           (for (I . C) Colors
+                (let (OR (adjust-color (car C)) OG (adjust-color (cadr C)) OB (adjust-color (caddr C)))
+                  (prinl I ": rgb(" OR ", " OG ", " OB ")")
+                  (curses "init_color" NIL (+ 7 I) OR OG OB)))
+           (curses "init_pair" NIL 1
+                   (cond
+                    ((= Scheme 'dark) *COLOR-SCHEME-TEXT)
+                    ((= Scheme 'light) *COLOR-SCHEME-BACKGROUND-DARK))
+                   Bkg)
+           (curses "init_pair" NIL 2 *COLOR-SCHEME-COMMENT Bkg)
+           (curses "init_pair" NIL 3 *COLOR-SCHEME-FUNCTION Bkg)
+           (curses "init_pair" NIL 4 *COLOR-SCHEME-VALUE Bkg)
+           (curses "init_pair" NIL 5 *COLOR-SCHEME-BACKGROUND-DARK *COLOR-SCHEME-COMMENT)
+           (curses "init_pair" NIL 6 *COLOR-SCHEME-BACKGROUND-DARK *COLOR-SCHEME-FUNCTION)
+           (curses "init_pair" NIL 7 *COLOR-SCHEME-BACKGROUND-DARK *COLOR-SCHEME-VALUE))))
 
 (de no-frames-left ()
     (or (not (lst? (car *State))) (= (length (car *State)) 0)))
