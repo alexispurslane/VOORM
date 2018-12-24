@@ -109,7 +109,6 @@
 
              (window-call> This "wattrset" NIL (| (color-pair *BORDER-COLOR) *BOLD))
              (window-call> This "mvwprintw" NIL (+ ShiftDown I) 0 "%s%d " LPad LineNum)
-             (window-call> This "wattroff" NIL (| (color-pair *BORDER-COLOR) *BOLD))
 
              (window-call> This "wattrset" NIL (color-pair 1))
              (for O (+ (/ (length X) WindowWidth) 1)
@@ -125,7 +124,6 @@
 
              (draw-selection> This)
              (draw-cursor> This)
-             (window-call> This "wattroff" NIL (color-pair 1))
 
              (setq ShiftDown LocalShiftDown)))
       ShiftDown))
@@ -150,11 +148,6 @@
 
     (draw-box> This)
     (draw-statusline> This)
-
-    (if (= (cadr *State) Idx)
-        (window-call> This "wattroff" NIL (| (color-pair *BORDER-COLOR) *BOLD))
-      (window-call> This "wattroff" NIL (color-pair *BORDER-COLOR)))
-
 
     (set (:: shift) (draw-contents> This))
 

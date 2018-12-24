@@ -1,5 +1,5 @@
 (de curses @
-    (pass native "libncursesw.so.6"))
+    (pass native "libncursesw.so.6.1"))
 
 
 
