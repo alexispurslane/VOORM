@@ -1,4 +1,6 @@
-(setq *BORDER-COLOR 7)
+(setq *MAIN-COLOR 6)
+(setq *BORDER-COLOR 2)
+(setq *SELECTION-COLOR 8)
 
 (class +VisibleFrame +Frame)
 
@@ -70,7 +72,7 @@
                              (- (length Line) VisibleSSX))
                             ((= Y VisibleY) VisibleX)
                             (T (length Line)))
-                           (| *REVERSE *BOLD) (: colors) 0)))))
+                           (color-pair *SELECTION-COLOR) (: colors) 0)))))
 
 (dm draw-cursor> ()
     (when (= LineNum (: cursory))
@@ -81,7 +83,7 @@
         (window-call> This "mvwchgat" NIL
                       VisibleY
                       (- VisibleX 1)
-                      1 *REVERSE 1 0))))
+                      1 (color-pair *SELECTION-COLOR) 1 0))))
 
 (dm draw-contents> ()
     (let (Height (- (: height) 1)
@@ -110,7 +112,7 @@
              (window-call> This "wattrset" NIL (| (color-pair *BORDER-COLOR) *BOLD))
              (window-call> This "mvwprintw" NIL (+ ShiftDown I) 0 "%s%d " LPad LineNum)
 
-             (window-call> This "wattrset" NIL (color-pair 1))
+             (window-call> This "wattrset" NIL (color-pair *MAIN-COLOR))
              (for O (+ (/ (length X) WindowWidth) 1)
                   (let (RealX (+ 1 (* (- O 1) WindowWidth))
                         Str (pack (head WindowWidth (nth (chop X) RealX))))
@@ -139,7 +141,7 @@
     (window-call> This "mvwprintw" NIL 0 (- (: width) (length (: name)) 3) "<%s>" (: name)))
 
 (dm draw> (Idx)
-    (window-call> This "wbkgd" NIL (color-pair 1))
+    (window-call> This "wbkgd" NIL (color-pair *MAIN-COLOR))
 
 
     (if (= (cadr *State) Idx)

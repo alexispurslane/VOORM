@@ -1,7 +1,77 @@
+Scheme Count: 1
+Scheme Names: (base16-material-palenight)
+Chosen Scheme: base16-material-palenight
 Colors:
-1: rgb(216, 228, 252)
-2: rgb(908, 956, 896)
-3: rgb(968, 968, 968)
-4: rgb(612, 748, 1000)
-5: rgb(508, 252, 340)
-6: rgb(612, 136, 272)
+("292D3E" "444267" "32374D" "676E95" "8796B0" "959DCB" "959DCB" "FFFFFF" "F07178" "F78C6C" "FFCB6B" "C3E88D" "89DDFF" "82AAFF" "C792EA" "FF5370")
+1: rgb(164, 180, 248)
+2: rgb(272, 264, 412)
+3: rgb(200, 220, 308)
+4: rgb(412, 440, 596)
+5: rgb(540, 600, 704)
+6: rgb(596, 628, 812)
+7: rgb(596, 628, 812)
+8: rgb(1000, 1000, 1000)
+9: rgb(960, 452, 480)
+10: rgb(988, 560, 432)
+11: rgb(1000, 812, 428)
+12: rgb(780, 928, 564)
+13: rgb(548, 884, 1000)
+14: rgb(520, 680, 1000)
+15: rgb(796, 584, 936)
+16: rgb(1000, 332, 448)
+Color pair 1: { Foreground = 12, Background = 8  }
+Color pair 2: { Foreground = 12, Background = 9  }
+Color pair 3: { Foreground = 12, Background = 10  }
+Color pair 4: { Foreground = 12, Background = 11  }
+Color pair 5: { Foreground = 12, Background = 15  }
+Color pair 6: { Foreground = 13, Background = 8  }
+Color pair 7: { Foreground = 13, Background = 9  }
+Color pair 8: { Foreground = 13, Background = 10  }
+Color pair 9: { Foreground = 13, Background = 11  }
+Color pair 10: { Foreground = 13, Background = 15  }
+Color pair 11: { Foreground = 14, Background = 8  }
+Color pair 12: { Foreground = 14, Background = 9  }
+Color pair 13: { Foreground = 14, Background = 10  }
+Color pair 14: { Foreground = 14, Background = 11  }
+Color pair 15: { Foreground = 14, Background = 15  }
+Color pair 16: { Foreground = 16, Background = 8  }
+Color pair 17: { Foreground = 16, Background = 9  }
+Color pair 18: { Foreground = 16, Background = 10  }
+Color pair 19: { Foreground = 16, Background = 11  }
+Color pair 20: { Foreground = 16, Background = 15  }
+Color pair 21: { Foreground = 17, Background = 8  }
+Color pair 22: { Foreground = 17, Background = 9  }
+Color pair 23: { Foreground = 17, Background = 10  }
+Color pair 24: { Foreground = 17, Background = 11  }
+Color pair 25: { Foreground = 17, Background = 15  }
+Color pair 26: { Foreground = 18, Background = 8  }
+Color pair 27: { Foreground = 18, Background = 9  }
+Color pair 28: { Foreground = 18, Background = 10  }
+Color pair 29: { Foreground = 18, Background = 11  }
+Color pair 30: { Foreground = 18, Background = 15  }
+Color pair 31: { Foreground = 19, Background = 8  }
+Color pair 32: { Foreground = 19, Background = 9  }
+Color pair 33: { Foreground = 19, Background = 10  }
+Color pair 34: { Foreground = 19, Background = 11  }
+Color pair 35: { Foreground = 19, Background = 15  }
+Color pair 36: { Foreground = 20, Background = 8  }
+Color pair 37: { Foreground = 20, Background = 9  }
+Color pair 38: { Foreground = 20, Background = 10  }
+Color pair 39: { Foreground = 20, Background = 11  }
+Color pair 40: { Foreground = 20, Background = 15  }
+Color pair 41: { Foreground = 21, Background = 8  }
+Color pair 42: { Foreground = 21, Background = 9  }
+Color pair 43: { Foreground = 21, Background = 10  }
+Color pair 44: { Foreground = 21, Background = 11  }
+Color pair 45: { Foreground = 21, Background = 15  }
+Color pair 46: { Foreground = 22, Background = 8  }
+Color pair 47: { Foreground = 22, Background = 9  }
+Color pair 48: { Foreground = 22, Background = 10  }
+Color pair 49: { Foreground = 22, Background = 11  }
+Color pair 50: { Foreground = 22, Background = 15  }
+Color pair 51: { Foreground = 23, Background = 8  }
+Color pair 52: { Foreground = 23, Background = 9  }
+Color pair 53: { Foreground = 23, Background = 10  }
+Color pair 54: { Foreground = 23, Background = 11  }
+Color pair 55: { Foreground = 23, Background = 15  }
+Choosing Main Color Pairs...

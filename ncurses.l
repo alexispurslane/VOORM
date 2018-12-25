@@ -3,12 +3,8 @@
 
 
 
-(de ncurses-bits (M S)
-    (>> (- (+ S 8)) M) )
-
-
-(de ncurses-mouse-mask (B M)
-    (>> (* (- B 1) -5) M) )
+(de ncurses-bits (M S) (>> (- (+ S 8)) M) )
+(de ncurses-mouse-mask (B M) (>> (* (- B 1) -5) M) )
 
 (setq *REPORT-MOUSE-POS (ncurses-mouse-mask 6 8))
 
@@ -17,9 +13,8 @@
 (setq *BOLD (ncurses-bits 1 13))
 (setq *REVERSE (ncurses-bits 1 10))
 
-(setq *Color (ncurses-bits (- (>> 1 -8) 1) 0))
-
-(de color-pair (n) (& (ncurses-bits n 0) *Color))
+(de color-pair (n)
+    (& (>> -8 n) (>> -8 (- (>> -8 1) 1))))
 
 (setq *COLOR-BLACK   0)
 (setq *COLOR-RED     1)
@@ -29,12 +24,29 @@
 (setq *COLOR-MAGENTA 5)
 (setq *COLOR-YELLOW  6)
 (setq *COLOR-WHITE   7)
-(setq *COLOR-SCHEME-BACKGROUND-DARK 8)
-(setq *COLOR-SCHEME-BACKGROUND-LIGHT 9)
-(setq *COLOR-SCHEME-TEXT 10)
-(setq *COLOR-SCHEME-FUNCTION 11)
-(setq *COLOR-SCHEME-COMMENT 12)
-(setq *COLOR-SCHEME-VALUE 13)
+
+(setq *COLOR-SCHEME-COLOR-LIST '(BACKGROUND-DEFUALT
+                                 BACKGROUND-LIGHTER
+                                 BACKGROUND-SELECT
+                                 BACKGROUND-COMMENT
+                                 FOREGROUND-DARK
+                                 FOREGROUND-DEFAULT
+                                 FOREGROUND-LIGHT
+                                 BACKGROUND-LIGHT
+                                 VARIABLES
+                                 VALUES
+                                 CLASSES
+                                 STRINGS
+                                 SUPPORT
+                                 FUNCTIONS
+                                 KEYWORDS
+                                 DEPRICATED))
+
+(for I (range 1 16)
+     (let (Name (chop (car (nth *COLOR-SCHEME-COLOR-LIST I)))
+           ExName (pack (append (chop "*COLOR-SCHEME-") Name))
+           Symbol (car (str ExName)))
+       (set Symbol (+ 7 I))))
 
 (de print-with-attr (A . Rest)
     (curses "attron" NIL A)

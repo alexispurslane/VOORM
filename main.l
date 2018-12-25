@@ -1,6 +1,7 @@
 (setq *Loc "/usr/share/voorm/")
 
 (load "/usr/lib/picolisp/lib.l")
+(load "/usr/lib/picolisp/lib/misc.l")
 (load (pack *Loc "ncurses.l"))
 (load (pack *Loc "frame.l"))
 (load (pack *Loc "graphics.l"))
@@ -51,28 +52,45 @@
     (curses "curs_set" NIL 0)
     (curses "start_color")
     (let (Config (eval (in "/usr/share/voorm/voorm-settings.l" (read)))
-          Colors (cdr (assoc 'color-scheme-colors Config))
-          Scheme (cdr (assoc 'color-scheme Config))
-          Bkg (cond
-               ((= Scheme 'dark) *COLOR-SCHEME-BACKGROUND-DARK)
-               ((= Scheme 'light) *COLOR-SCHEME-BACKGROUND-LIGHT)))
+          Schemes (cdr (assoc 'color-scheme-colors Config))
+          SchemeName (cdr (assoc 'color-scheme Config))
+          Colors (cdr (assoc SchemeName Schemes))
+          Fgds (5 6 7 9 10 11 12 13 14 15 16)
+          Bgds (1 2 3 4 8)
+          ColorPairs (uniq (mapcar '((Fgd) (mapcar '((Bgd) (cons Fgd Bgd)) Bgds)) Fgds)))
       (out "/usr/share/voorm/voorm.log"
+           (prinl "Scheme Count: " (length Schemes))
+
+           (prin "Scheme Names: ")
+           (println (mapcar car Schemes))
+
+           (prinl "Chosen Scheme: " SchemeName)
+
            (prinl "Colors:")
+           (println Colors)
            (for (I . C) Colors
-                (let (OR (adjust-color (car C)) OG (adjust-color (cadr C)) OB (adjust-color (caddr C)))
-                  (prinl I ": rgb(" OR ", " OG ", " OB ")")
-                  (curses "init_color" NIL (+ 7 I) OR OG OB)))
-           (curses "init_pair" NIL 1
-                   (cond
-                    ((= Scheme 'dark) *COLOR-SCHEME-TEXT)
-                    ((= Scheme 'light) *COLOR-SCHEME-BACKGROUND-DARK))
-                   Bkg)
-           (curses "init_pair" NIL 2 *COLOR-SCHEME-COMMENT Bkg)
-           (curses "init_pair" NIL 3 *COLOR-SCHEME-FUNCTION Bkg)
-           (curses "init_pair" NIL 4 *COLOR-SCHEME-VALUE Bkg)
-           (curses "init_pair" NIL 5 *COLOR-SCHEME-BACKGROUND-DARK *COLOR-SCHEME-COMMENT)
-           (curses "init_pair" NIL 6 *COLOR-SCHEME-BACKGROUND-DARK *COLOR-SCHEME-FUNCTION)
-           (curses "init_pair" NIL 7 *COLOR-SCHEME-BACKGROUND-DARK *COLOR-SCHEME-VALUE))))
+                (let (Color
+                      (cond [(str? C)
+                             (let (Color (chop C) Colors '())
+                               (for I 3
+                                    (let (Sect (head 2 (nth Color (+ 1 (* (- I 1) 2))))
+                                          ColorPart (list (adjust-color (hex (pack Sect)))))
+                                         (setq Colors (append Colors ColorPart))))
+                               Colors)]
+                            [(lst? C) (mapcar adjust-color C)]
+                            [T (prinl "Error parsing color")])
+                      (R G B) Color)
+                  (prinl I ": rgb(" R ", " G ", " B ")")
+                  (curses "init_color" NIL (+ 7 I) R G B)))
+           (let I 1
+                (for (Y . ColorPairs2) ColorPairs
+                     (for (X . P) (uniq ColorPairs2)
+                          (prinl "Color pair " I ": { Foreground = " (+ 7 (car P))
+                                 ", Background = " (+ 7 (cdr P)) "  }")
+                          (curses "init_pair" NIL I (+ 7 (car P)) (+ 7 (cdr P)))
+                          (setq I (+ 1 I)))))
+
+           (prinl "Choosing Main Color Pairs..."))))
 
 (de no-frames-left ()
     (or (not (lst? (car *State))) (= (length (car *State)) 0)))
