@@ -35,18 +35,19 @@
     (curses "mvprintw" NIL 1 1 "Merry Christmas!"))
 
 (de main ()
-    (let Screen (curses "initscr" 'N)
-         (native "@" "setlocale" NIL 0 "")
-         (curses "raw")
-         (curses "noecho")
+    (finally (curses  "endwin")
 
-         (init-color-pairs)
+             (curses "initscr" 'N)
+             (native "@" "setlocale" NIL 0 "")
+             (curses "raw")
+             (curses "noecho")
 
-         (draw-border 1)
-         (draw-message 2)
+             (init-color-pairs)
 
-         (curses "getch" 'I)
-         (curses  "refresh")
-         (curses "endwin")))
+             (draw-border 1)
+             (draw-message 2)
+
+             (curses  "refresh")
+             (curses "getch" 'I)))
 (main)
 (bye)
