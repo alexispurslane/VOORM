@@ -22,11 +22,11 @@
 (dm in-selection> (X Y)
     (let ((SX SY) (: select-start) CX (: cursorx) CY (: cursory))
       (and (: select-start)
-       (or
-        (and (= Y SY CY) (>= X SX) (<= X CX))
-        (and (= Y CY) (<= X CX))
-        (and (= Y SY) (>= X SX))
-        (and (< Y CY) (> Y SY))))))
+           (cond
+            ((and (= Y SY CY) (>= X SX) (<= X CX)) T)
+            ((and (= Y CY) (not (= Y SY)) (<= X CX)) T)
+            ((and (= Y SY) (not (= Y CY)) (>= X SX)) T)
+            (T (and (< Y CY) (> Y SY)))))))
 
 (dm selected-text> ()
     (let Selection '()
@@ -59,6 +59,16 @@
 
 (dm paste> (Register)
     (mapcar '((C) (add-char> This C)) (chop (get (cadddr *State) Register))))
+
+(dm delete-between> (Pos1 Pos2)
+    (let (Begin (head (- (cadr Pos1) 1) (: lines))
+                Insert (cond
+                        ((> (car Pos1) 1)
+                         (head (max 1 (- (car Pos1) 2)) (chop (get-line> This (cadr Pos1)))))
+                        (T ""))
+          End (nth (: lines) (+ (cadr Pos2) 1))
+          Outert (nth (chop (get-line> This (cadr Pos2))) (+ (car Pos2) 1)))
+      (set (:: lines) (append Begin (list (pack Insert Outert)) End))))
 
 (dm get-line> (Y) (car (nth (: lines) (or Y (: cursory)))))
 
