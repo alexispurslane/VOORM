@@ -44,36 +44,6 @@
 (dm draw-box> ()
     (window-call> This "wborder" NIL 32 32 32 32 32 32 32 32))
 
-(dm draw-selection> ()
-    (when (and (: select-start) (<= (cadr (: select-start)) I) (>= (: cursory) I))
-      (let (SelectStartX (car (: select-start))
-            SelectStartY (cadr (: select-start))
-            VisibleSSX (+ (- MarginOffset 1)
-                          (% SelectStartX (+ WindowWidth 1))
-                          (/ SelectStartX (+ WindowWidth 1)))
-            AdjSSY (- SelectStartY (: scroll))
-            VisibleSSY (+ AdjSSY ShiftDown (/ SelectStartX (+ WindowWidth 1)))
-
-            VisibleX (+ MarginOffset
-                        (% (: cursorx) (+ WindowWidth 1))
-                        (/ (: cursorx) (+ WindowWidth 1)))
-            VisibleY (+ I ShiftDown (/ (: cursorx) (+ WindowWidth 1))))
-        (for Y (range VisibleSSY VisibleY)
-             (window-call> This "mvwchgat" NIL
-                           Y
-                           (cond
-                            ((= Y VisibleSSY) VisibleSSX)
-                            ((= Y VisibleY) VisibleX)
-                            (T 1))
-                           (cond
-                            ((= Y VisibleSSY VisibleY)
-                             (- VisibleX VisibleSSX))
-                            ((= Y VisibleSSY)
-                             (- (length Line) VisibleSSX))
-                            ((= Y VisibleY) VisibleX)
-                            (T (length Line)))
-                           0 *SELECTION-COLOR 0)))))
-
 (dm draw-cursor> ()
     (when (= LineNum (: cursory))
       (let (VisibleX (+ MarginOffset
@@ -115,16 +85,17 @@
              (window-call> This "wattrset" NIL (color-pair *MAIN-COLOR))
              (for O (+ (/ (length X) WindowWidth) 1)
                   (let (RealX (+ 1 (* (- O 1) WindowWidth))
-                        Str (pack (head WindowWidth (nth (chop X) RealX))))
-                       (window-call> This "mvwprintw" NIL
-                                     (+ LocalShiftDown I)
-                                     MarginOffset
-                                     "%s%s"
-                                     Str
-                                     (if (< (length X) WindowWidth) RPad ""))
-                       (setq LocalShiftDown (+ LocalShiftDown 1))))
+                        Str (head WindowWidth (nth (chop X) RealX)))
+                    (window-call> This "wmove" NIL (+ LocalShiftDown I) MarginOffset)
+                    (for (S . C) Str
+                         (if (in-selection> This (+ RealX S) LineNum)
+                             (window-call> This "wattrset" NIL (color-pair *SELECTION-COLOR))
+                           (window-call> This "wattrset" NIL (color-pair *MAIN-COLOR)))
+                         (window-call> This "wprintw" NIL "%c" (char C)))
+                    (window-call> This "wprintw" NIL "%s"
+                                  (if (< (length X) WindowWidth) RPad ""))
+                    (setq LocalShiftDown (+ LocalShiftDown 1))))
 
-             (draw-selection> This)
              (draw-cursor> This)
 
              (setq ShiftDown LocalShiftDown)))
@@ -139,8 +110,8 @@
       (window-call> This "mvwprintw" NIL 0 1 Section1
                     (: cursorx)
                     (: cursory)
-                    (car (: select-start))
-                    (cadr (: select-start)))
+                    (if (: select-start) (car (: select-start)) -1)
+                    (if (: select-start) (cadr (: select-start)) -1))
 
       (window-call> This "wattrset" NIL (| (color-pair 4) Prop))
       (window-call> This "wprintw" NIL "\9205\ ")

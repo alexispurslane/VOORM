@@ -20,10 +20,13 @@
     (set (:: select-start) (list (: cursorx) (: cursory))))
 
 (dm in-selection> (X Y)
-    (and (>= (car (: select-start)) X)
-         (<= (: cursorx))
-         (>= (cadr (: select-start)))
-         (<= (: cursory))))
+    (let ((SX SY) (: select-start) CX (: cursorx) CY (: cursory))
+      (and (: select-start)
+       (or
+        (and (= Y SY CY) (>= X SX) (<= X CX))
+        (and (= Y CY) (<= X CX))
+        (and (= Y SY) (>= X SX))
+        (and (< Y CY) (> Y SY))))))
 
 (dm selected-text> ()
     (let Selection '()
@@ -37,13 +40,12 @@
                            (- (: cursorx) (car (: select-start))))
                           ((= LY (cadr (: select-start)))
                            (- (length Line) (car (: select-start))))
-                          ((= LY (: cursory)) (: cursorx))
+                          ((= LY (: cursory)) (- (: cursorx) 1))
                           (T (length Line)))
                     SX (cond
                         ((= LY (cadr (: select-start)))
                          (car (: select-start)))
-                        ((= LY (: cursory))
-                         (: cursorx))
+                        ((= LY (: cursory)) 1)
                         (T 1))
                     Section (head (+ Dist 1) (nth Line SX))
                     NewLineInsert (append Selection
