@@ -143,29 +143,3 @@
     (set (:: shift) (draw-contents> This))
 
     (window-call> This "wrefresh" NIL))
-
-(class +Menu)
-
-(dm choice> () (: choice))
-
-(dm handle-key> (Ch)
-    (cond
-     ((= Ch (char "h")) (adjust-cursor> This -1 0))
-     ((= Ch (char "k")) (adjust-cursor> This 0 -1))
-     ((= Ch (char "j")) (adjust-cursor> This 0 1))
-     ((= Ch (char "l")) (adjust-cursor> This 1 0))
-     ((= Ch (char "\n"))
-      (set (:: choice) (get-line> This))))
-    *State)
-
-(dm handle-mouse> (MX MY)
-    (move-cursor> This MX (- MY 1))
-    (set (:: choice) (car (nth (: lines) (: cursory))))
-    *State)
-
-(dm handle-resize> ()
-    (window-call> This "wclear" NIL)
-    (set (:: width) (get-width Screen))
-    (set (:: height) (get-height Screen))
-    (destroy-window (: window))
-    (set (:: window) (create-new-window (: x) (: y) (: width) (: height))))

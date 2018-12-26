@@ -123,3 +123,38 @@
                                   (: lines)
                                   (pack (remove (- (: cursorx) 1) Line)))))
       (adjust-cursor> This -1 0))))
+
+(class +Popup)
+
+(dm register-handler> (Callback)
+    (set (:: callbacks) (cons Callback (: callbacks))))
+
+(dm handle-mouse> (MX MY)
+    (move-cursor> This MX (+ MY (: scroll)))
+    *State)
+
+(dm pos-inside> (MX MY)
+    (and (>= MX (: x)) (>= MY (: y))
+         (<= MY (+ (: height) (: y))) (<= MX (+ (: x) (: width)))))
+
+(dm handle-key> (Ch)
+    (let (Frames (car *State) Focus (cadr *State) Mode (caddr *State) Clipboard (cadddr *State))
+      (setq Exit NIL)
+      (cond
+       ((= Ch *KEY-LEFT) (adjust-cursor> This -1 0))
+       ((= Ch *KEY-UP) (adjust-cursor> This 0 -1))
+       ((= Ch *KEY-DOWN) (adjust-cursor> This 0 1))
+       ((= Ch *KEY-RIGHT) (adjust-cursor> This 1 0))
+       ((= Ch (char "")) (delete-char> This))
+       ((= Ch (char "q")) (setq Exit T))
+       ((or (= Ch (char "\n")) (= Ch (char "\r")))
+        (setq Exit T))
+       ((= Ch 27) (setq Exit T))
+       (T (add-char> This (char Ch))))
+      (if Exit
+          (let Res (list (delete This Frames) (max 1 (- (length Frames) 1)) Mode Clipboard)
+               (delete> This)
+               (curses "clear" NIL)
+               (for Callback (: callbacks) (Callback (get-line> This)))
+               Res)
+        (list Frames Focus Mode Clipboard))))

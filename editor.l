@@ -51,6 +51,31 @@
                            (start-selection> This))
                           ((= Ch (char "p"))
                            (paste> This))
+                          ((= Ch (char "/"))
+                           (let (Width (/ (get-width Screen) 2)
+                                 Height 3
+                                 X (- (/ (get-width Screen) 2) (/ Width 2))
+                                 Y (- (/ (get-height Screen) 3) Height)
+                                 Popup (new '(+Popup +VisibleFrame) X Y Width Height
+                                            (list "What") 1 1 1 "Search/Replace"))
+                             (register-handler> Popup (curry (This) (Line)
+                                                             (out "+/usr/share/voorm/voorm.log"
+                                                                  (prinl (name> This) ": " Line))))
+                             (setq Frames (append Frames (list Popup)))
+                             (setq Focus (length Frames))))
+                          ((= Ch (char ":"))
+                           (let (Width (/ (get-width Screen) 2)
+                                       Height 3
+                                       X (- (/ (get-width Screen) 2) (/ Width 2))
+                                       Y (- (/ (get-height Screen) 3) Height)
+                                       Popup (new '(+Popup +VisibleFrame) X Y Width Height
+                                                  (list ":") 2 1 1 "Command Palette"))
+                             (register-handler> Popup (curry (This) (Line)
+                                                             (out "+/usr/share/voorm/voorm.log"
+                                                                  (prinl (name> This) ": "
+                                                                         (run (str (head 1 Line)))))))
+                             (setq Frames (append Frames (list Popup)))
+                             (setq Focus (length Frames))))
                           ((= Ch (char "h")) (adjust-cursor> This -1 0))
                           ((= Ch (char "k")) (adjust-cursor> This 0 -1))
                           ((= Ch (char "j")) (adjust-cursor> This 0 1))
