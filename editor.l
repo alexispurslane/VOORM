@@ -1,3 +1,9 @@
+(de w () (out-to-file> This))
+(de e (Fn)
+    (setq Fn (pack (replace (chop Fn) "~" (sys "HOME"))))
+    (set (:: name) Fn)
+    (load-from-file> This Fn))
+
 (class +FromFile)
 
 (dm load-from-file> (Name)

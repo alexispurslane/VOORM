@@ -76,7 +76,7 @@
     (let (LineLen (length (get-line> This CY))
           FileLen (length (: lines)))
       (set (:: cursorx) (max 1 (min (+ 1 LineLen) CX)))
-      (set (:: cursory) (max 1 (min (length (: lines)) CY)))))
+      (set (:: cursory) (max 1 (min (max 1 (length (: lines))) CY)))))
 
 (dm adjust-cursor> (DX DY)
     (move-cursor> This

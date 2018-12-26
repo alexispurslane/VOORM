@@ -8,13 +8,16 @@
 (load (pack *Loc "editor.l"))
 
 (de create-frames (Argv)
+    (unless (> (length Argv) 0)
+        (setq Argv (list "scratch.txt")))
     (let (Frames '() Width (/ (get-width Screen) (length Argv)))
       (for (I . FileName) Argv
            (let Frame (new '(+Editor +FromFile +VisibleFrame)
                            (* (- I 1) Width) 0
                            Width (get-height Screen)
                            (list "") 1 1 1 FileName)
-                (load-from-file> Frame)
+                (unless (= FileName "scratch.txt")
+                  (load-from-file> Frame))
                 (push 'Frames Frame)))
       Frames))
 
@@ -58,37 +61,36 @@
           Fgds (5 6 7 9 10 11 12 13 14 15 16)
           Bgds (1 2 3 4 8)
           ColorPairs (uniq (mapcar '((Fgd) (mapcar '((Bgd) (cons Fgd Bgd)) Bgds)) Fgds)))
-      (out "/usr/share/voorm/voorm.log"
-           (prinl "Scheme Count: " (length Schemes))
+      (prinl "Scheme Count: " (length Schemes))
 
-           (prin "Scheme Names: ")
-           (println (mapcar car Schemes))
+      (prin "Scheme Names: ")
+      (println (mapcar car Schemes))
 
-           (prinl "Chosen Scheme: " SchemeName)
+      (prinl "Chosen Scheme: " SchemeName)
 
-           (prinl "Colors:")
-           (println Colors)
-           (for (I . C) Colors
-                (let (Color
-                      (cond [(str? C)
-                             (let (Color (chop C) Colors '())
-                               (for I 3
-                                    (let (Sect (head 2 (nth Color (+ 1 (* (- I 1) 2))))
-                                          ColorPart (list (adjust-color (hex (pack Sect)))))
-                                         (setq Colors (append Colors ColorPart))))
-                               Colors)]
-                            [(lst? C) (mapcar adjust-color C)]
-                            [T (prinl "Error parsing color")])
-                      (R G B) Color)
-                  (prinl I ": rgb(" R ", " G ", " B ")")
-                  (curses "init_color" NIL (+ 7 I) R G B)))
-           (let I 1
-                (for (Y . ColorPairs2) ColorPairs
-                     (for (X . P) (uniq ColorPairs2)
-                          (prinl "Color pair " I ": { Foreground = " (+ 7 (car P))
-                                 ", Background = " (+ 7 (cdr P)) "  }")
-                          (curses "init_pair" NIL I (+ 7 (car P)) (+ 7 (cdr P)))
-                          (setq I (+ 1 I))))))))
+      (prinl "Colors:")
+      (println Colors)
+      (for (I . C) Colors
+           (let (Color
+                 (cond [(str? C)
+                        (let (Color (chop C) Colors '())
+                          (for I 3
+                               (let (Sect (head 2 (nth Color (+ 1 (* (- I 1) 2))))
+                                     ColorPart (list (adjust-color (hex (pack Sect)))))
+                                 (setq Colors (append Colors ColorPart))))
+                          Colors)]
+                       [(lst? C) (mapcar adjust-color C)]
+                       [T (prinl "Error parsing color")])
+                 (R G B) Color)
+             (prinl I ": rgb(" R ", " G ", " B ")")
+             (curses "init_color" NIL (+ 7 I) R G B)))
+      (let I 1
+           (for (Y . ColorPairs2) ColorPairs
+                (for (X . P) (uniq ColorPairs2)
+                     (prinl "Color pair " I ": { Foreground = " (+ 7 (car P))
+                            ", Background = " (+ 7 (cdr P)) "  }")
+                     (curses "init_pair" NIL I (+ 7 (car P)) (+ 7 (cdr P)))
+                     (setq I (+ 1 I)))))))
 
 (de no-frames-left ()
     (or (not (lst? (car *State))) (= (length (car *State)) 0)))
@@ -99,16 +101,21 @@
 (de main ()
     (in-screen
      Screen
+     (out "/usr/share/voorm/voorm.log"
+          (prinl (catch '("Undefined" "No such file" "Div")
+                   (setq *State (list (create-frames (argv)) 1 'normal 'clipboard))
+                   (init-screen)
 
-     (setq *State (list (create-frames (argv)) 1 'normal 'clipboard))
-     (init-screen)
-
-     (draw-frames)
-     (until (no-frames-left)
-            (let (Frames (car *State) Focus (cadr *State) Mode (caddr *State) Clipboard (cadddr *State))
-              (draw-frames)
-              (let? Frame (isa '+VisibleFrame (car (nth Frames Focus)))
-                    (setq *State (update-state (window-call> Frame "wgetch" 'I)
-                                               Frame)))))))
+                   (draw-frames)
+                   (until (no-frames-left)
+                          (let (Frames (car *State)
+                                       Focus (cadr *State)
+                                       Mode (caddr *State)
+                                       Clipboard (cadddr *State))
+                            (draw-frames)
+                            (let? Frame (isa '+VisibleFrame (car (nth Frames Focus)))
+                                  (setq *State (update-state (window-call> Frame "wgetch" 'I)
+                                                             Frame))))))))))
 (main)
+(prinl "Bye!")
 (bye)
