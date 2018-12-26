@@ -45,19 +45,19 @@
     (window-call> This "wborder" NIL 32 32 32 32 32 32 32 32))
 
 (dm draw-selection> ()
-    (when (: select-start)
+    (when (and (: select-start) (<= (cadr (: select-start)) I) (>= (: cursory) I))
       (let (SelectStartX (car (: select-start))
             SelectStartY (cadr (: select-start))
-            VisibleSSX (+ MarginOffset 3
+            VisibleSSX (+ (- MarginOffset 1)
                           (% SelectStartX (+ WindowWidth 1))
                           (/ SelectStartX (+ WindowWidth 1)))
             AdjSSY (- SelectStartY (: scroll))
             VisibleSSY (+ AdjSSY ShiftDown (/ SelectStartX (+ WindowWidth 1)))
 
-            VisibleX (+ MarginOffset 3
+            VisibleX (+ MarginOffset
                         (% (: cursorx) (+ WindowWidth 1))
                         (/ (: cursorx) (+ WindowWidth 1)))
-            VisibleY (+ (- (: cursory) (: scroll)) ShiftDown (/ (: cursorx) (+ WindowWidth 1))))
+            VisibleY (+ I ShiftDown (/ (: cursorx) (+ WindowWidth 1))))
         (for Y (range VisibleSSY VisibleY)
              (window-call> This "mvwchgat" NIL
                            Y
@@ -72,7 +72,7 @@
                              (- (length Line) VisibleSSX))
                             ((= Y VisibleY) VisibleX)
                             (T (length Line)))
-                           (color-pair *SELECTION-COLOR) (: colors) 0)))))
+                           0 *SELECTION-COLOR 0)))))
 
 (dm draw-cursor> ()
     (when (= LineNum (: cursory))
@@ -83,7 +83,7 @@
         (window-call> This "mvwchgat" NIL
                       VisibleY
                       (- VisibleX 1)
-                      1 (color-pair *SELECTION-COLOR) 1 0))))
+                      1 0 10 0))))
 
 (dm draw-contents> ()
     (let (Height (- (: height) 1)
@@ -131,13 +131,30 @@
       ShiftDown))
 
 (dm draw-statusline> ()
-    (window-call> This "mvwprintw" NIL 0 1 "\9094\ (%d, %d) \9112\ (%d, %d)\9205\   \8661\ %d \9093\ %d \9175\ %d\9205\   \9000\  %s"
-                  (: cursorx)
-                  (: cursory)
-                  (car (: select-start))
-                  (cadr (: select-start))
-                  (: scroll) Idx (length (get-line> This))
-                  (caddr *State))
+    (let (Section1 "\9094\ (%d, %d) \9112\ (%d, %d)"
+          Section2 "\8661\ %d \9093\ %d \9175\ %d"
+          Section3 "\9000\  %s")
+      (window-call> This "wattrset" NIL (| (color-pair 36) *REVERSE))
+      (window-call> This "mvwprintw" NIL 0 1 Section1
+                    (: cursorx)
+                    (: cursory)
+                    (car (: select-start))
+                    (cadr (: select-start)))
+
+      (window-call> This "wattrset" NIL (| (color-pair 4) *REVERSE))
+      (window-call> This "wprintw" NIL "\9205\ ")
+
+      (window-call> This "wattrset" NIL (| (color-pair 41) *REVERSE))
+      (window-call> This "wprintw" NIL Section2
+                    (: scroll) Idx (length (get-line> This)))
+
+      (window-call> This "wattrset" NIL (| (color-pair 4) *REVERSE))
+      (window-call> This "wprintw" NIL "\9205\ ")
+
+      (window-call> This "wattrset" NIL (| (color-pair 46) *REVERSE))
+      (window-call> This "wprintw" NIL Section3
+                    (caddr *State)))
+
     (window-call> This "mvwprintw" NIL 0 (- (: width) (length (: name)) 3) "<%s>" (: name)))
 
 (dm draw> (Idx)

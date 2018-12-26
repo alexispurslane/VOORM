@@ -88,9 +88,7 @@
                           (prinl "Color pair " I ": { Foreground = " (+ 7 (car P))
                                  ", Background = " (+ 7 (cdr P)) "  }")
                           (curses "init_pair" NIL I (+ 7 (car P)) (+ 7 (cdr P)))
-                          (setq I (+ 1 I)))))
-
-           (prinl "Choosing Main Color Pairs..."))))
+                          (setq I (+ 1 I))))))))
 
 (de no-frames-left ()
     (or (not (lst? (car *State))) (= (length (car *State)) 0)))
