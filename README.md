@@ -1,7 +1,7 @@
-## VOORM
+# VOORM
 ## Lightweight, extensable, hotloading, VIM-compatable
 
-VOORM is an editor born out of inspiration... It combines the philosophy of the language it is
+VOORM is an editor born out of inspiration. It combines the philosophy of the language it is
 written in-- PicoLisp, and the central, core ideas useful to making a good editor.
 VOORM has four main goals:
 
@@ -18,7 +18,7 @@ VOORM has four main goals:
    able to add to the editor and be removed from the editor without a restart.
 4. VOORM must be VIM-compatable. Leveraging the wide userbase that has both muscle-memory for
    and an appreciation of VIM-keybindings, VOORM must support this extremely powerful mode of
-   operation. (Pun intended)
+   operation.
 
 All of these features are made possible by PicoLisp: for VOORM to be lightweight, we had few
 choices, and almost none of them had the ability to do the other points as well as picolisp did.
@@ -49,6 +49,9 @@ this is nowhere near the final editor.
 ![Two windows, editing other window](/screenshots/VOORM2.png?raw=true "Two windows, editing other window")
 ![One window, editing own source](/screenshots/VOORM3.png?raw=true "One window, editing own souce")
 
-Hover over screenshots to see tooltips of what's happening.
+Hover over screenshots to see tooltips.
+
+
+
 
 

@@ -70,10 +70,12 @@
                                        Y (- (/ (get-height Screen) 3) Height)
                                        Popup (new '(+Popup +VisibleFrame) X Y Width Height
                                                   (list ":") 2 1 1 "Command Palette"))
-                             (register-handler> Popup (curry (This) (Line)
-                                                             (out "+/usr/share/voorm/voorm.log"
-                                                                  (prinl (name> This) ": "
-                                                                         (run (str (head 1 Line)))))))
+                             (register-handler>
+                              Popup
+                              (curry (This) (Line)
+                                     (out "+/usr/share/voorm/voorm.log"
+                                          (let Cmd (str (pack (nth (chop Line) 2)))
+                                               (prinl (name> This) ": " (eval Cmd))))))
                              (setq Frames (append Frames (list Popup)))
                              (setq Focus (length Frames))))
                           ((= Ch (char "h")) (adjust-cursor> This -1 0))
