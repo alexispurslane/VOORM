@@ -19,8 +19,23 @@
 (dm start-selection> ()
     (set (:: select-start) (list (: cursorx) (: cursory))))
 
+(de >pnt (A B)
+    (let ((X1 Y1) A (X2 Y2) B)
+      (or (> X1 X2) (> Y1 Y2))))
+(de <pnt (A B)
+    (let ((X1 Y1) A (X2 Y2) B)
+      (or (< X1 X2) (< Y1 Y2))))
+
+(dm order-sel-pnts> ()
+    (cond
+     ((>pnt (: select-start) (list (: cursorx) (: cursory)))
+      (list (list (: cursorx) (: cursory)) (: select-start)))
+     ((<pnt (: select-start) (list (: cursorx) (: cursory)))
+      (list (: select-start) (list (: cursorx) (: cursory))))
+     (T (list (: select-start) (list (: cursorx) (: cursory))))))
+
 (dm in-selection> (X Y)
-    (let ((SX SY) (: select-start) CX (: cursorx) CY (: cursory))
+    (let (((SX SY) (CX CY)) (order-sel-pnts> This))
       (and (: select-start)
            (cond
             ((and (= Y SY CY) (>= X SX) (<= X CX)) T)
@@ -29,28 +44,24 @@
             (T (and (< Y CY) (> Y SY)))))))
 
 (dm selected-text> ()
-    (let Selection '()
-         (for (LY . L) (head (+ 1 (- (: cursory)
-                                     (cadr (: select-start))))
-                             (nth (: lines) (cadr (: select-start))))
-              (let (LY (+ LY (- (cadr (: select-start)) 1))
+    (let (Selection '()
+          ((SX SY) (CX CY)) (order-sel-pnts> This))
+         (for (LY . L) (head (+ 1 (- CY SY))
+                             (nth (: lines) SY))
+              (let (LY (+ LY (- SY 1))
                     Line (chop L)
                     Dist (cond
-                          ((= LY (cadr (: select-start)) (: cursory))
-                           (- (: cursorx) (car (: select-start))))
-                          ((= LY (cadr (: select-start)))
-                           (- (length Line) (car (: select-start))))
-                          ((= LY (: cursory)) (- (: cursorx) 1))
+                          ((= LY SY CY) (- CX SX))
+                          ((= LY SY) (- (length Line) SX))
+                          ((= LY CY) (- CX 1))
                           (T (length Line)))
-                    SX (cond
-                        ((= LY (cadr (: select-start)))
-                         (car (: select-start)))
-                        ((= LY (: cursory)) 1)
+                    S1X (cond
+                        ((= LY SY) SX)
+                        ((= LY CY) 1)
                         (T 1))
-                    Section (head (+ Dist 1) (nth Line SX))
+                    Section (head (+ Dist 1) (nth Line S1X))
                     NewLineInsert (append Selection
-                                          (list (if (> (- LY (cadr (: select-start))) 0) "\n" "")
-                                                Section)))
+                                          (list (if (> (- LY SY) 0) "\n" "") Section)))
                 (setq Selection NewLineInsert)))
          (pack Selection)))
 

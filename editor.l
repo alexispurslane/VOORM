@@ -116,9 +116,9 @@
                            (copy> This)
                            (set (:: select-start) NIL))
                           ((= Ch (char "d"))
-                           (delete-between> This (: select-start)
-                                            (list (: cursorx) (: cursory)))
-                           (set (:: select-start) NIL))))
+                           (let ((SP CP) (order-sel-pnts> This))
+                             (delete-between> This SP CP)
+                             (set (:: select-start) NIL)))))
        ((= Mode 'replace) (cond
                           ((= Ch *KEY-LEFT) (adjust-cursor> This -1 0))
                           ((= Ch *KEY-UP) (adjust-cursor> This 0 -1))

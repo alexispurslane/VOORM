@@ -77,7 +77,6 @@
                      (curses "raw")
                      (curses "noecho")
                      (curses "set_escdelay" NIL 15)
-                     (curses "nodelay" NIL (run Var) 0)
                      (run Body)))))
 
 (de create-new-window (X Y W H)
