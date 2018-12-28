@@ -74,4 +74,13 @@ Color pair 52: { Foreground = 23, Background = 9  }
 Color pair 53: { Foreground = 23, Background = 10  }
 Color pair 54: { Foreground = 23, Background = 11  }
 Color pair 55: { Foreground = 23, Background = 15  }
-1visualclipboard
+Result: ((0 0))
+((0 0))
+Matched at: 00
+Real Y: 1
+Real X: 1
+Real Y: 1
+Real X: 1
+Real Points: 1, 1; 1, 1
+(((1 1) (1 1)))
+1normalclipboard

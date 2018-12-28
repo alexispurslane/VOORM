@@ -63,10 +63,10 @@
                                  X (- (/ (get-width Screen) 2) (/ Width 2))
                                  Y (- (/ (get-height Screen) 3) Height)
                                  Popup (new '(+Popup +VisibleFrame) X Y Width Height
-                                            (list "What") 1 1 1 "Search/Replace"))
+                                            (list "") 1 1 1 "Search"))
                              (register-handler> Popup (curry (This) (Line)
-                                                             (out "+/usr/share/voorm/voorm.log"
-                                                                  (prinl (name> This) ": " Line))))
+                                                             (prin "Result: ")
+                                                             (println (look-for> This Line))))
                              (setq Frames (append Frames (list Popup)))
                              (setq Focus (length Frames))))
                           ((= Ch (char ":"))
@@ -79,9 +79,8 @@
                              (register-handler>
                               Popup
                               (curry (This) (Line)
-                                     (out "+/usr/share/voorm/voorm.log"
-                                          (let Cmd (str (pack (nth (chop Line) 2)))
-                                               (prinl (name> This) ": " (eval Cmd))))))
+                                     (let Cmd (str (pack (nth (chop Line) 2)))
+                                          (prinl (name> This) ": " (eval Cmd)))))
                              (setq Frames (append Frames (list Popup)))
                              (setq Focus (length Frames))))
                           ((= Ch (char "h")) (adjust-cursor> This -1 0))

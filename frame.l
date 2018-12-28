@@ -14,6 +14,53 @@
 (dm cursor-x> () (: cursorx))
 (dm cursor-y> () (: cursory))
 
+(de real-y (Text Pos)
+    (prinl "Real Y: " Pos)
+    (flush)
+    (let (Y 1 Text (chop Text))
+         (for I Pos
+              (let C (car (nth Text I))
+                   (if (= C "\n")
+                       (setq Y (+ 1 Y)))))
+         Y))
+
+(de real-x (Text Pos)
+    (prinl "Real X: " Pos)
+    (flush)
+    (let (C "" Text (chop Text))
+      (max 1
+           (- Pos (for (I Pos (and (>= I 1) (not (= C "\n"))) (dec I))
+                       (setq C (car (nth Text I)))
+                       I)))))
+
+(de offset-to-points (MatchPtr)
+    (prinl "Matched at: " MatchPtr)
+    (let ((StringOffsetStart StringOffsetEnd) MatchPtr
+          RealY1 (real-y (text> This) (+ 1 StringOffsetStart))
+          RealX1 (real-x (text> This) (+ 1 StringOffsetStart))
+          RealY2 (real-y (text> This) (+ 1 StringOffsetEnd))
+          RealX2 (real-x (text> This) (+ 1 StringOffsetEnd)))
+      (prinl "Real Points: " RealX1 ", " RealY1 "; " RealX2 ", " RealY2)
+      (list (list RealX1 RealY1) (list RealX2 RealY2))))
+
+(dm look-for> (Pat)
+    (let (String (text> This))
+      (use (Preg MatchPtrList)
+           (native "@" "regcomp" 'I '(Preg (64 B . 64)) Pat 1)
+           (let Result (native "@" "regexec" 'I
+                               (cons NIL (64) Preg)
+                               String
+                               0
+                               '(MatchPtrList (400 (I . 2)) . 0)
+                               0)
+                (println MatchPtrList)
+                (cond
+                 ((=0 Result)
+                  (println MatchPtrList)
+                  (mapcar offset-to-points MatchPtrList))
+                 (T (prinl "Search Failed: C library returned " Result)
+                    '()))))))
+
 (dm select-start> () (: select-start))
 
 (dm start-selection> ()
