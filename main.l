@@ -1,4 +1,4 @@
-(setq *Loc "/usr/share/voorm/")
+(setq *Loc "/home/christopherdumas/voorm/")
 
 (load "/usr/lib/picolisp/lib.l")
 (load "/usr/lib/picolisp/lib/misc.l")
@@ -101,7 +101,7 @@
 (de main ()
     (in-screen
      Screen
-     (out "/usr/share/voorm/voorm.log"
+     (out (pack *Loc "voorm.log")
           (prinl (catch '("Undefined" "No such file" "Div")
                    (setq *State (list (create-frames (argv)) 1 'normal 'clipboard))
                    (init-screen)
